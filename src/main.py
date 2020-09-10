@@ -113,18 +113,26 @@ def generate_df(df):
         + df["N_GIR"].str[-4:]
     )
 
-    if "DOCUMENTO" in list(df.columns):
-        df["username"] = np.where(
-            df["DOCUMENTO"].notnull(),
-            df["DOCUMENTO"].str.lower(),
-            gir_username,
-        )
-    elif "DNI_ALUMNO" in list(df.columns):
-        df["username"] = np.where(
-            df["DNI_ALUMNO"].notnull(),
-            df["DNI_ALUMNO"].str.lower(),
-            gir_username,
-        )
+    # if "DOCUMENTO" in list(df.columns):
+    #     df["username"] = np.where(
+    #         df["DOCUMENTO"].notnull(),
+    #         df["DOCUMENTO"].str.lower(),
+    #         gir_username,
+    #     )
+    # elif "DNI_ALUMNO" in list(df.columns):
+    #     df["username"] = np.where(
+    #         df["DNI_ALUMNO"].notnull(),
+    #         df["DNI_ALUMNO"].str.lower(),
+    #         gir_username,
+    #     )
+
+    # df["username"] = np.where(
+    #     df["username"].notnull(),
+    #     df["username"],
+    #     df["NOMBRE"].str.lower() + df["N_GIR"].str[-4:],
+    # )
+
+    df["username"] = gir_username
 
     df["username"] = np.where(
         df["username"].notnull(),

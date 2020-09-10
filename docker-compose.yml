@@ -7,3 +7,7 @@ services:
       - "./src:/usr/src/app/src"
     networks:
       - soporte_catedu_aragon_frontend
+
+networks:
+  soporte_catedu_aragon_frontend:
+    external: true

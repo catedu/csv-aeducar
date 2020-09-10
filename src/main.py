@@ -171,7 +171,8 @@ footer {visibility: hidden;}
 
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-t = "<div><span class='highlight red'>Aplicación en fase de test</span></div>"
+# t = "<div><span class='highlight red'>Aplicación en fase de test</span></div>"
+t = "# Aplicación en fase de test"
 
 st.markdown(t, unsafe_allow_html=True)
 

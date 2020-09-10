@@ -6,6 +6,9 @@ import io
 import base64
 import io
 import uuid
+from load_css import local_css
+
+# local_css("style.css")
 
 
 def get_table_download_link(df):
@@ -108,8 +111,8 @@ def generate_df(df):
 
     gir_username = (
         df["NOMBRE"].str.lower().str[0]
-        + df["APELLIDO1"].str.lower().str[:3]
-        + df["APELLIDO2"].str.lower().str[:3]
+        + df["APELLIDO1"].str.replace(" ", "").str.lower().str[:3]
+        + df["APELLIDO2"].str.replace(" ", "").str.lower().str[:3]
         + df["N_GIR"].str[-4:]
     )
 
@@ -167,6 +170,10 @@ footer {visibility: hidden;}
 """
 
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+t = "<div><span class='highlight red'>Aplicación en fase de test</span></div>"
+
+st.markdown(t, unsafe_allow_html=True)
 
 st.sidebar.write(
     """## Web que genera CSVs listos para subir a Moodle.

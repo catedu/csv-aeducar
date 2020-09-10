@@ -82,6 +82,57 @@ columns_to_add = [
     "role13",
 ]
 
+
+def generate_df(df):
+    columns = filter(filterColumns, df.columns)
+    df = df.drop(columns=columns)
+    df["N_GIR"] = df["N_GIR"].astype(str)
+    df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_PADRE"])
+    df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_MADRE"])
+    df["email"] = np.where(
+        df["EMAIL"].notnull(),
+        df["EMAIL"],
+        "alumnado@education.catedu.es",
+    )
+    df["password"] = "changeme"
+
+    gir_username = (
+        df["NOMBRE"].str.lower().str[0]
+        + df["APELLIDO1"].str.lower().str[:3]
+        + df["APELLIDO2"].str.lower().str[:3]
+        + df["N_GIR"].str[-4:]
+    )
+
+    df["username"] = np.where(
+        df["DNI_ALUMNO"].notnull(),
+        df["DNI_ALUMNO"].str.lower(),
+        gir_username,
+    )
+    df["username"] = np.where(
+        df["username"].notnull(),
+        df["username"],
+        df["NOMBRE"].str.lower() + df["N_GIR"].str[-4:],
+    )
+
+    df["username"] = (
+        df["username"]
+        .str.normalize("NFKD")
+        .str.encode("ascii", errors="ignore")
+        .str.decode("utf-8")
+    )
+
+    df["firstname"] = df["NOMBRE"].str.capitalize()
+    df["lastname"] = (
+        df["APELLIDO1"].str.capitalize() + " " + df["APELLIDO2"].str.capitalize()
+    )
+    df = df.drop(columns=[column for column in df.columns if column.isupper()])
+    df1 = df
+    global columns_to_add
+    df2 = pd.DataFrame(columns=columns_to_add)
+    df1 = pd.concat([df1, df2])
+    return df1
+
+
 hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
@@ -92,22 +143,40 @@ footer {visibility: hidden;}
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.sidebar.write(
-    """A lo largo del Jueves 10 y Viernes 11 publicaremos más información de ayuda."""
+    """## Web que genera CSVs listos para subir a Moodle.
+
+### Instrucciones para centros de secundaria
+
+Campos requeridos en el archivo .xls o .csv de entrada (respetando mayúsculas):
+* N_GIR
+* EMAIL
+* NOMBRE
+* APELLIDO1
+* APELLIDO2
+* DNI_ALUMNO o DNI en el caso de profesores
+
+Campos opcionales:
+* EMAIL_PADRE
+* EMAIL_MADRE
+
+### Instrucciones para centros de infantil y primaria
+
+A final del día 10 de Septiembre de 2020."""
 )
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
 st.write(
     """
-# Prepara tu csv para la carga de usuarios en tu centro aeducar
+## Prepara tu csv para la carga de usuarios en tu centro aeducar
 
-### Este proceso, de momento, sólo es válido para centros de Secundaria
+#### Este proceso, de momento, sólo es válido para centros de Secundaria
 
 Esta aplicación sube los datos a un servidor propiedad del Gobierno de Aragón, para su tramiento y devolución al usuario.
 
 Una vez devuelto el .csv, no se conserva ningún dato en el servidor.
 
-* **Campos requeridos en el csv o excel de subida**: 
+*Más instrucciones desplegando el menú de la izquierda*
 """
 )
 
@@ -119,110 +188,59 @@ if file_bytes:
         s = str(bytes_data)
         data = io.StringIO(s)
         df_csv = pd.read_csv(data, delimiter=";")
+        df = generate_df(df_csv)
 
-        df_csv = df_csv.drop(
-            columns=[
-                "IDTIPOENS",
-                "COD_TIPO_ENSENANZA",
-                "TIPO_ENSENANZA",
-                "IDENSENANZA",
-                "COD_ENSENANZA",
-                "ENSENANZA",
-                "IDMODALIDAD",
-                "MODALIDAD",
-                "CURSO",
-                "IDGRUPO",
-                "GRUPO",
-            ]
-        )
-
-        df_csv["IDALUMNO"] = (df_csv["IDALUMNO"] * 1000).astype(int).astype(str)
-        df_csv["email"] = np.where(
-            df_csv["EMAIL"].notnull(), df_csv["EMAIL"], "alumnado@education.catedu.es"
-        )
-        df1 = pd.DataFrame()
-        gir_username = (
-            df_csv["NOMBRE"].str.lower().str[0]
-            + df_csv["APELLIDO1"].str.lower().str[:3]
-            + df_csv["APELLIDO2"].str.lower().str[:3]
-            + df_csv["IDALUMNO"].str[-4:]
-        )
-        df1["username"] = np.where(
-            df_csv["DOCUMENTO"].notnull(), df_csv["DOCUMENTO"].str.lower(), gir_username
-        )
-        df1["username"] = (
-            df1["username"]
-            .str.normalize("NFKD")
-            .str.encode("ascii", errors="ignore")
-            .str.decode("utf-8")
-        )
-        df1["password"] = "changeme"
-        df1["firstname"] = df_csv["NOMBRE"].str.capitalize()
-        df1["lastname"] = (
-            df_csv["APELLIDO1"].str.capitalize()
-            + " "
-            + df_csv["APELLIDO2"].str.capitalize()
-        )
-        df1["email"] = df_csv["email"]
-        df2 = pd.DataFrame(columns=columns_to_add)
-        df1 = pd.concat([df1, df2])
     except:
         df_excel = pd.read_excel(file_bytes, sheet_name="datos")
+        df = generate_df(df_excel)
 
-        columns = filter(filterColumns, df_excel.columns)
-        df_excel = df_excel.drop(columns=columns)
-        df_excel["N_GIR"] = df_excel["N_GIR"].astype(str)
-        df_excel["email"] = np.where(
-            df_excel["EMAIL"].notnull(), df_excel["EMAIL"], df_excel["EMAIL_PADRE"]
-        )
-        df_excel["email"] = np.where(
-            df_excel["EMAIL"].notnull(), df_excel["EMAIL"], df_excel["EMAIL_MADRE"]
-        )
-        df_excel["email"] = np.where(
-            df_excel["EMAIL"].notnull(),
-            df_excel["EMAIL"],
-            "alumnado@education.catedu.es",
-        )
-        df_excel["password"] = "changeme"
+    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
-        gir_username = (
-            df_excel["NOMBRE"].str.lower().str[0]
-            + df_excel["APELLIDO1"].str.lower().str[:3]
-            + df_excel["APELLIDO2"].str.lower().str[:3]
-            + df_excel["N_GIR"].str[-4:]
-        )
+    st.dataframe(df)
 
-        df_excel["username"] = np.where(
-            df_excel["DNI_ALUMNO"].notnull(),
-            df_excel["DNI_ALUMNO"].str.lower(),
-            gir_username,
-        )
-        df_excel["username"] = np.where(
-            df_excel["username"].notnull(),
-            df_excel["username"],
-            df_excel["NOMBRE"].str.lower() + df_excel["N_GIR"].str[-4:],
-        )
+    #     df_csv = df_csv.drop(
+    #         columns=[
+    #             "IDTIPOENS",
+    #             "COD_TIPO_ENSENANZA",
+    #             "TIPO_ENSENANZA",
+    #             "IDENSENANZA",
+    #             "COD_ENSENANZA",
+    #             "ENSENANZA",
+    #             "IDMODALIDAD",
+    #             "MODALIDAD",
+    #             "CURSO",
+    #             "IDGRUPO",
+    #             "GRUPO",
+    #         ]
+    #     )
 
-        df_excel["username"] = (
-            df_excel["username"]
-            .str.normalize("NFKD")
-            .str.encode("ascii", errors="ignore")
-            .str.decode("utf-8")
-        )
-
-        df_excel["firstname"] = df_excel["NOMBRE"].str.capitalize()
-        df_excel["lastname"] = (
-            df_excel["APELLIDO1"].str.capitalize()
-            + " "
-            + df_excel["APELLIDO2"].str.capitalize()
-        )
-        df_excel = df_excel.drop(
-            columns=[column for column in df_excel.columns if column.isupper()]
-        )
-        df1 = df_excel
-        df2 = pd.DataFrame(columns=columns_to_add)
-        df1 = pd.concat([df1, df2])
-
-    st.markdown(get_table_download_link(df1), unsafe_allow_html=True)
-
-    st.dataframe(df1)
+    #     df_csv["IDALUMNO"] = (df_csv["IDALUMNO"] * 1000).astype(int).astype(str)
+    #     df_csv["email"] = np.where(
+    #         df_csv["EMAIL"].notnull(), df_csv["EMAIL"], "alumnado@education.catedu.es"
+    #     )
+    #     df1 = pd.DataFrame()
+    #     gir_username = (
+    #         df_csv["NOMBRE"].str.lower().str[0]
+    #         + df_csv["APELLIDO1"].str.lower().str[:3]
+    #         + df_csv["APELLIDO2"].str.lower().str[:3]
+    #         + df_csv["IDALUMNO"].str[-4:]
+    #     )
+    #     df1["username"] = np.where(
+    #         df_csv["DOCUMENTO"].notnull(), df_csv["DOCUMENTO"].str.lower(), gir_username
+    #     )
+    #     df1["username"] = (
+    #         df1["username"]
+    #         .str.normalize("NFKD")
+    #         .str.encode("ascii", errors="ignore")
+    #         .str.decode("utf-8")
+    #     )
+    #     df1["password"] = "changeme"
+    #     df1["firstname"] = df_csv["NOMBRE"].str.capitalize()
+    #     df1["lastname"] = (
+    #         df_csv["APELLIDO1"].str.capitalize()
+    #         + " "
+    #         + df_csv["APELLIDO2"].str.capitalize()
+    #     )
+    #     df1["email"] = df_csv["email"]
+    #     df2 = pd.DataFrame(columns=columns_to_add)
+    #     df1 = pd.concat([df1, df2])

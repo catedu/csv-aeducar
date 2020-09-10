@@ -2,7 +2,7 @@ version: "3"
 services:
   streamlit:
     build: .
-    command: "streamlit run src/main.py"
+    command: "streamlit run src/main.py --logger.level=error"
     ports:
       - "8501:8501"
     volumes:

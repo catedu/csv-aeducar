@@ -3,8 +3,6 @@ services:
   streamlit:
     build: .
     command: "streamlit run src/main.py --logger.level=error"
-    ports:
-      - "80:80"
     volumes:
       - "./src:/usr/src/app/src"
     networks:

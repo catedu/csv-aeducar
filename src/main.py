@@ -23,6 +23,9 @@ def get_table_download_link(df):
 
 def filterColumns(column):
     to_preserve = [
+        "IDALUMNO",
+        "DOCUMENTO",
+        "DNI",
         "N_GIR",
         "APELLIDO1",
         "APELLIDO2",
@@ -86,9 +89,16 @@ columns_to_add = [
 def generate_df(df):
     columns = filter(filterColumns, df.columns)
     df = df.drop(columns=columns)
-    df["N_GIR"] = df["N_GIR"].astype(str)
-    df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_PADRE"])
-    df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_MADRE"])
+
+    if "IDALUMNO" in list(df.columns):
+        df["N_GIR"] = (df_csv["IDALUMNO"] * 1000).astype(int).astype(str)
+    else:
+        df["N_GIR"] = df["N_GIR"].astype(str)
+    try:
+        df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_PADRE"])
+        df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_MADRE"])
+    except:
+        pass
     df["email"] = np.where(
         df["EMAIL"].notnull(),
         df["EMAIL"],
@@ -103,11 +113,19 @@ def generate_df(df):
         + df["N_GIR"].str[-4:]
     )
 
-    df["username"] = np.where(
-        df["DNI_ALUMNO"].notnull(),
-        df["DNI_ALUMNO"].str.lower(),
-        gir_username,
-    )
+    if "DOCUMENTO" in list(df.columns):
+        df["username"] = np.where(
+            df["DOCUMENTO"].notnull(),
+            df["DOCUMENTO"].str.lower(),
+            gir_username,
+        )
+    elif "DNI_ALUMNO" in list(df.columns):
+        df["username"] = np.where(
+            df["DNI_ALUMNO"].notnull(),
+            df["DNI_ALUMNO"].str.lower(),
+            gir_username,
+        )
+
     df["username"] = np.where(
         df["username"].notnull(),
         df["username"],
@@ -189,7 +207,7 @@ if file_bytes:
         data = io.StringIO(s)
         df_csv = pd.read_csv(data, delimiter=";")
         df = generate_df(df_csv)
-
+        df = generate_df(df_csv)
     except:
         df_excel = pd.read_excel(file_bytes, sheet_name="datos")
         df = generate_df(df_excel)

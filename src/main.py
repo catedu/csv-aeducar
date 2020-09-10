@@ -4,6 +4,8 @@ import numpy as np
 import os
 import io
 import base64
+import io
+import uuid
 
 
 def get_table_download_link(df):
@@ -38,6 +40,48 @@ def filterColumns(column):
         return True
 
 
+columns_to_add = [
+    "course1",
+    "course2",
+    "course3",
+    "course4",
+    "course5",
+    "course6",
+    "course7",
+    "course8",
+    "course9",
+    "course10",
+    "course11",
+    "course12",
+    "course13",
+    "group1",
+    "group2",
+    "group3",
+    "group4",
+    "group5",
+    "group6",
+    "group7",
+    "group8",
+    "group9",
+    "group10",
+    "group11",
+    "group12",
+    "group13",
+    "role1",
+    "role2",
+    "role3",
+    "role4",
+    "role5",
+    "role6",
+    "role7",
+    "role8",
+    "role9",
+    "role10",
+    "role11",
+    "role12",
+    "role13",
+]
+
 hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
@@ -47,24 +91,34 @@ footer {visibility: hidden;}
 
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
+st.sidebar.write(
+    """A lo largo del Jueves 10 y Viernes 11 publicaremos más información de ayuda."""
+)
+
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
 st.write(
     """
 # Prepara tu csv para la carga de usuarios en tu centro aeducar
 
+### Este proceso, de momento, sólo es válido para centros de Secundaria
+
 Esta aplicación sube los datos a un servidor propiedad del Gobierno de Aragón, para su tramiento y devolución al usuario.
 
 Una vez devuelto el .csv, no se conserva ningún dato en el servidor.
+
+* **Campos requeridos en el csv o excel de subida**: 
 """
 )
 
 file_bytes = st.file_uploader("Sube un archivo .csv o .xls", type=("csv", "xls"))
 
-
 if file_bytes:
     try:
-        df_csv = pd.read_csv(file_bytes, delimiter=";")
+        bytes_data = file_bytes.read()
+        s = str(bytes_data)
+        data = io.StringIO(s)
+        df_csv = pd.read_csv(data, delimiter=";")
 
         df_csv = df_csv.drop(
             columns=[
@@ -102,6 +156,7 @@ if file_bytes:
             .str.encode("ascii", errors="ignore")
             .str.decode("utf-8")
         )
+        df1["password"] = "changeme"
         df1["firstname"] = df_csv["NOMBRE"].str.capitalize()
         df1["lastname"] = (
             df_csv["APELLIDO1"].str.capitalize()
@@ -109,8 +164,10 @@ if file_bytes:
             + df_csv["APELLIDO2"].str.capitalize()
         )
         df1["email"] = df_csv["email"]
+        df2 = pd.DataFrame(columns=columns_to_add)
+        df1 = pd.concat([df1, df2])
     except:
-        df_excel = pd.read_excel("IES Miguel Serve (as).xls", "datos")
+        df_excel = pd.read_excel(file_bytes, sheet_name="datos")
 
         columns = filter(filterColumns, df_excel.columns)
         df_excel = df_excel.drop(columns=columns)
@@ -126,6 +183,7 @@ if file_bytes:
             df_excel["EMAIL"],
             "alumnado@education.catedu.es",
         )
+        df_excel["password"] = "changeme"
 
         gir_username = (
             df_excel["NOMBRE"].str.lower().str[0]
@@ -162,6 +220,9 @@ if file_bytes:
             columns=[column for column in df_excel.columns if column.isupper()]
         )
         df1 = df_excel
+        df2 = pd.DataFrame(columns=columns_to_add)
+        df1 = pd.concat([df1, df2])
 
     st.markdown(get_table_download_link(df1), unsafe_allow_html=True)
+
     st.dataframe(df1)

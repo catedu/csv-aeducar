@@ -1,5 +1,7 @@
 FROM python:3.7
 
+ENV PYTHONUNBUFFERED 1
+
 EXPOSE 80
 
 WORKDIR /usr/src/app

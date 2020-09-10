@@ -7,6 +7,10 @@ services:
       - "./src:/usr/src/app/src"
     networks:
       - soporte_catedu_aragon_frontend
+    environment:
+      VIRTUAL_HOST: csv.aeducar.es
+      LETSENCRYPT_HOST: csv.aeducar.es
+      LETSENCRYPT_EMAIL: jesuslopezdeleyva@gmail.com
 
 networks:
   soporte_catedu_aragon_frontend:

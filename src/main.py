@@ -33,7 +33,7 @@ Campos opcionales:
 * EMAIL_PADRE
 * EMAIL_MADRE
 
-Puedes probar el funcionamiento descargando [este archivo para tests](https://csv.aeducar.es/prueba-alumnado.xls).
+Puedes probar el funcionamiento descargando [este archivo para tests](https://github.com/catedu/csv-aeducar/raw/master/src/prueba-alumnado.xls).
 """,
     "profesores_secundaria": """## Descarga tu .xls del SIGAD
 
@@ -47,7 +47,7 @@ Campos mínimos requeridos en el archivo .xls:
 * Apellido 2
 * Nº documento
 
-Puedes probar el funcionamiento descargando [este archivo para tests](https://csv.aeducar.es/prueba-alumnado.xls).
+Puedes probar el funcionamiento descargando [este archivo para tests](https://github.com/catedu/csv-aeducar/raw/master/src/prueba-alumnado.xls).
 """,
     "en_progreso": """## Servicio no disponbile.
 

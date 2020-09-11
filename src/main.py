@@ -10,6 +10,48 @@ from load_css import local_css
 
 # local_css("style.css")
 
+TEXTS = {
+    "intro": """
+Esta aplicación sube los datos a un servidor propiedad del Gobierno de Aragón, para su tramiento y devolución al usuario.
+
+Una vez devuelto el .csv, no se conserva ningún dato en el servidor.
+
+*Más instrucciones desplegando el menú de la izquierda*
+""",
+    "alumnos_secundaria": """## Descarga tu .xls del SIGAD
+
+En Utilidades -> Informes -> ALUM -> descarga Listado completo de alumnos con todos sus datos.
+
+Campos mínimos requeridos en el archivo .xls:
+* N_GIR
+* EMAIL (aunque haya registros vacíos)
+* NOMBRE
+* APELLIDO1
+* APELLIDO2
+
+Campos opcionales:
+* EMAIL_PADRE
+* EMAIL_MADRE
+""",
+    "profesores_secundaria": """## Descarga tu .xls del SIGAD
+
+### Sería necesario añadir el campo mail. Si alguien sabe cómo sacar estos datos del SIGAD incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos. De momento todos los registros tendrán el mismo mail. El profesorado podrá acceder a su perfil y modificarlo ya en su moodle.
+
+En Personal -> Búsqueda -> Exportar -> descarga Listado completo de profesores con todos sus datos.
+
+Campos mínimos requeridos en el archivo .xls:
+* Nombre
+* Apellido 1
+* Apellido 2
+* Nº documento
+""",
+    "en_progreso": """## Servicio no disponbile.
+
+Este servicio estará disponible durante la semana del 14 al 18 de Septiembre
+
+    """,
+}
+
 
 def get_table_download_link(df):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
@@ -24,20 +66,15 @@ def get_table_download_link(df):
     return href
 
 
-def filterColumns(column):
+def filterColumnsAlumnosSec(column):
     to_preserve = [
-        "IDALUMNO",
-        "DOCUMENTO",
-        "DNI",
         "N_GIR",
         "APELLIDO1",
         "APELLIDO2",
         "NOMBRE",
-        "DNI_ALUMNO",
         "EMAIL",
         "EMAIL_PADRE",
         "EMAIL_MADRE",
-        "ENSENANZA",
     ]
 
     if column in to_preserve:
@@ -89,14 +126,11 @@ columns_to_add = [
 ]
 
 
-def generate_df(df):
-    columns = filter(filterColumns, df.columns)
+def generate_df_alumnos_secundaria(df):
+    columns = filter(filterColumnsAlumnosSec, df.columns)
     df = df.drop(columns=columns)
 
-    if "IDALUMNO" in list(df.columns):
-        df["N_GIR"] = (df_csv["IDALUMNO"] * 1000).astype(int).astype(str)
-    else:
-        df["N_GIR"] = df["N_GIR"].astype(str)
+    df["N_GIR"] = df["N_GIR"].astype(str)
     try:
         df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_PADRE"])
         df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_MADRE"])
@@ -112,28 +146,8 @@ def generate_df(df):
     gir_username = (
         df["NOMBRE"].str.lower().str[0]
         + df["APELLIDO1"].str.replace(" ", "").str.lower().str[:3]
-        + df["APELLIDO2"].str.replace(" ", "").str.lower().str[:3]
         + df["N_GIR"].str[-4:]
     )
-
-    # if "DOCUMENTO" in list(df.columns):
-    #     df["username"] = np.where(
-    #         df["DOCUMENTO"].notnull(),
-    #         df["DOCUMENTO"].str.lower(),
-    #         gir_username,
-    #     )
-    # elif "DNI_ALUMNO" in list(df.columns):
-    #     df["username"] = np.where(
-    #         df["DNI_ALUMNO"].notnull(),
-    #         df["DNI_ALUMNO"].str.lower(),
-    #         gir_username,
-    #     )
-
-    # df["username"] = np.where(
-    #     df["username"].notnull(),
-    #     df["username"],
-    #     df["NOMBRE"].str.lower() + df["N_GIR"].str[-4:],
-    # )
 
     df["username"] = gir_username
 
@@ -162,6 +176,21 @@ def generate_df(df):
     return df1
 
 
+def generate_df_profesores_secundaria(df):
+    df1 = pd.DataFrame()
+    df1["username"] = df["Nº documento"].str.lower()
+    df1["firstname"] = df["Nombre"].str.capitalize()
+    df1["lastname"] = (
+        df["Apellido 1"].str.capitalize() + " " + df["Apellido 2"].str.capitalize()
+    )
+    df1["email"] = "alumnado@education.catedu.es"
+    df["password"] = "changeme"
+    global columns_to_add
+    df2 = pd.DataFrame(columns=columns_to_add)
+    df1 = pd.concat([df1, df2])
+    return df1
+
+
 hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
@@ -172,109 +201,45 @@ footer {visibility: hidden;}
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # t = "<div><span class='highlight red'>Aplicación en fase de test</span></div>"
-t = "# Aplicación en fase de test"
+t = "# Prepara tu csv para la carga de usuarios en el moodle aeducar de tu centro"
 
 st.markdown(t, unsafe_allow_html=True)
 
-st.sidebar.write(
-    """## Web que genera CSVs listos para subir a Moodle.
+##### SIDEBAR
 
-### Instrucciones para centros de secundaria
-
-Campos requeridos en el archivo .xls o .csv de entrada (respetando mayúsculas):
-* N_GIR
-* EMAIL
-* NOMBRE
-* APELLIDO1
-* APELLIDO2
-* DNI_ALUMNO o DNI en el caso de profesores
-
-Campos opcionales:
-* EMAIL_PADRE
-* EMAIL_MADRE
-
-### Instrucciones para centros de infantil y primaria
-
-A final del día 10 de Septiembre de 2020."""
+option = st.sidebar.selectbox(
+    "¿Qué datos quieres subir",
+    [
+        "",
+        "Alumnado de Infantil y Primaria",
+        "Alumnado de Secundaria",
+        "Profesorado de Infantil y Primaria",
+        "Profesorado de Secundaria",
+    ],
 )
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
 
-st.write(
-    """
-## Prepara tu csv para la carga de usuarios en tu centro aeducar
+if option == "":
+    st.write(TEXTS["intro"])
+elif option == "Alumnado de Secundaria":
+    st.sidebar.write(TEXTS["alumnos_secundaria"])
+    file_bytes = st.file_uploader("Sube un archivo .xls", type=("xls"))
 
-#### Este proceso, de momento, sólo es válido para centros de Secundaria
-
-Esta aplicación sube los datos a un servidor propiedad del Gobierno de Aragón, para su tramiento y devolución al usuario.
-
-Una vez devuelto el .csv, no se conserva ningún dato en el servidor.
-
-*Más instrucciones desplegando el menú de la izquierda*
-"""
-)
-
-file_bytes = st.file_uploader("Sube un archivo .csv o .xls", type=("csv", "xls"))
-
-if file_bytes:
-    try:
-        bytes_data = file_bytes.read()
-        s = str(bytes_data)
-        data = io.StringIO(s)
-        df_csv = pd.read_csv(data, delimiter=";")
-        df = generate_df(df_csv)
-        df = generate_df(df_csv)
-    except:
+    if file_bytes:
         df_excel = pd.read_excel(file_bytes, sheet_name="datos")
-        df = generate_df(df_excel)
+        df = generate_df_alumnos_secundaria(df_excel)
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+        st.dataframe(df)
+elif option == "Profesorado de Secundaria":
+    st.sidebar.write(TEXTS["profesores_secundaria"])
+    file_bytes = st.file_uploader("Sube un archivo .xls", type=("xls"))
 
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
-
-    st.dataframe(df)
-
-    #     df_csv = df_csv.drop(
-    #         columns=[
-    #             "IDTIPOENS",
-    #             "COD_TIPO_ENSENANZA",
-    #             "TIPO_ENSENANZA",
-    #             "IDENSENANZA",
-    #             "COD_ENSENANZA",
-    #             "ENSENANZA",
-    #             "IDMODALIDAD",
-    #             "MODALIDAD",
-    #             "CURSO",
-    #             "IDGRUPO",
-    #             "GRUPO",
-    #         ]
-    #     )
-
-    #     df_csv["IDALUMNO"] = (df_csv["IDALUMNO"] * 1000).astype(int).astype(str)
-    #     df_csv["email"] = np.where(
-    #         df_csv["EMAIL"].notnull(), df_csv["EMAIL"], "alumnado@education.catedu.es"
-    #     )
-    #     df1 = pd.DataFrame()
-    #     gir_username = (
-    #         df_csv["NOMBRE"].str.lower().str[0]
-    #         + df_csv["APELLIDO1"].str.lower().str[:3]
-    #         + df_csv["APELLIDO2"].str.lower().str[:3]
-    #         + df_csv["IDALUMNO"].str[-4:]
-    #     )
-    #     df1["username"] = np.where(
-    #         df_csv["DOCUMENTO"].notnull(), df_csv["DOCUMENTO"].str.lower(), gir_username
-    #     )
-    #     df1["username"] = (
-    #         df1["username"]
-    #         .str.normalize("NFKD")
-    #         .str.encode("ascii", errors="ignore")
-    #         .str.decode("utf-8")
-    #     )
-    #     df1["password"] = "changeme"
-    #     df1["firstname"] = df_csv["NOMBRE"].str.capitalize()
-    #     df1["lastname"] = (
-    #         df_csv["APELLIDO1"].str.capitalize()
-    #         + " "
-    #         + df_csv["APELLIDO2"].str.capitalize()
-    #     )
-    #     df1["email"] = df_csv["email"]
-    #     df2 = pd.DataFrame(columns=columns_to_add)
-    #     df1 = pd.concat([df1, df2])
+    if file_bytes:
+        df_excel = pd.read_excel(file_bytes)
+        df = generate_df_profesores_secundaria(df_excel)
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+        st.dataframe(df)
+else:
+    st.sidebar.write(TEXTS["en_progreso"])
+    st.write(TEXTS["en_progreso"])

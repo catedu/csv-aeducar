@@ -347,8 +347,8 @@ elif option == "Alumnado de Infantil y Primaria":
         df_test = pd.read_csv(
             "https://raw.githubusercontent.com/catedu/csv-aeducar/master/src/test_ceip.csv"
         )
-    df_test["username"][0] = "rlop1234"
-    df_test["username"][1] = "clop5678"
+    df_test["username"][0] = "jlop1234"
+    df_test["username"][1] = "llop5678"
     df_test["firstname"][0] = "Javier"
     df_test["firstname"][1] = "Lucía"
     file_bytes = st.file_uploader(

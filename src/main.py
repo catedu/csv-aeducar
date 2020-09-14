@@ -52,7 +52,7 @@ Puedes probar el funcionamiento descargando [este archivo para tests](https://gi
 Este servicio estará disponible durante la semana del 14 al 18 de Septiembre
 
     """,
-    "alumnos_primaria": """## Descarga tu .xls del SIGAD
+    "alumnos_primaria": """## Descarga tu .xls del GIR
 
 Campos mínimos requeridos en el archivo .xls:
 * Nº Alumno GIR

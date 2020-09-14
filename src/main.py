@@ -56,7 +56,7 @@ Este servicio estará disponible durante la semana del 14 al 18 de Septiembre
 
 Para sacar estos datos, en GIR Académico sigue los pasos de la imagen:
 
-![https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_alumnos_gir.png]
+!(Descarga de datos de GIR)[https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_alumnos_gir.png]
 
 Campos mínimos requeridos en el archivo .xls:
 * Nº Alumno GIR

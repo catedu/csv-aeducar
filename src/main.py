@@ -4,8 +4,6 @@ import numpy as np
 import os
 import io
 import base64
-import io
-import uuid
 from load_css import local_css
 
 # local_css("style.css")
@@ -53,6 +51,22 @@ Puedes probar el funcionamiento descargando [este archivo para tests](https://gi
 
 Este servicio estará disponible durante la semana del 14 al 18 de Septiembre
 
+    """,
+    "alumnos_primaria": """## Descarga tu .xls del SIGAD
+
+Para sacar estos datos, en GIR Académico sigue los pasos de la imagen:
+
+![https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_alumnos_gir.png]
+
+Campos mínimos requeridos en el archivo .xls:
+* Nº Alumno GIR
+* Nombre
+* Apellidos
+* Grupo
+""",
+    "maestros": """
+Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos. De momento todos los registros tendrán el mismo mail. El alumnado podrá acceder a su perfil y modificarlo ya en su moodle.
+    
     """,
 }
 
@@ -128,6 +142,88 @@ columns_to_add = [
     "role12",
     "role13",
 ]
+
+
+def generate_df_alumnos_primaria(df):
+    to_delete = list(df.columns)
+
+    text2num = {
+        "1º": "primero",
+        "2º": "segundo",
+        "3º": "tercero",
+        "4º": "cuarto",
+        "5º": "quinto",
+        "6º": "sexto",
+    }
+
+    cursos_inf = [
+        "proyecto6",
+        "proyecto4",
+        "proyecto3",
+        "proyecto2",
+        "proyecto1",
+        "english",
+        "proyecto5",
+    ]
+
+    cursos_prim = [
+        "lengua",
+        "sociales",
+        "matematicas",
+        "ingles",
+        "edfisica",
+        "artistica",
+        "ciencias",
+    ]
+
+    df["Nº Alumno GIR"] = df["Nº Alumno GIR"].astype(str)
+    df["email"] = "alumnado@education.catedu.es"
+    gir_username = (
+        df["Nombre"].str.lower().str[0]
+        + df["Apellidos"].str.split().str[0].str.lower().str[:3]
+        + df["Nº Alumno GIR"].str[-4:]
+    )
+
+    df["username"] = gir_username
+    df["username"] = np.where(
+        df["username"].notnull(),
+        df["username"],
+        df["Nombre"].str.lower() + df["Nº Alumno GIR"].str[-4:],
+    )
+
+    df["username"] = (
+        df["username"]
+        .str.normalize("NFKD")
+        .str.encode("ascii", errors="ignore")
+        .str.decode("utf-8")
+    )
+
+    df["firstname"] = df["Nombre"]
+    df["lastname"] = df["Apellidos"]
+    df["password"] = "changeme"
+    df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
+    df["curso"] = df["curso"].apply(lambda x: text2num[x])
+    df["etapa"] = df["etapa"].str.lower()
+    df["grupo"] = df["grupo"].str[1]
+    df.loc[df["etapa"] == "inf", "courses_list"] = pd.Series([cursos_inf] * len(df))
+    df.loc[df["etapa"] == "prim", "courses_list"] = pd.Series([cursos_prim] * len(df))
+
+    for item in range(1, 8):
+
+        df["course" + str(item)] = (
+            df["courses_list"].apply(lambda x: x[item - 1])
+            + "_"
+            + df["curso"]
+            + "_"
+            + df["etapa"]
+        )
+        df["group" + str(item)] = df["grupo"]
+        df["role" + str(item)] = "student"
+
+    df = df.drop(columns=to_delete)
+    df = df.drop(columns=["curso", "etapa", "grupo", "courses_list"])
+
+    return df
 
 
 def generate_df_alumnos_secundaria(df):
@@ -242,6 +338,26 @@ elif option == "Profesorado de Secundaria":
     if file_bytes:
         df_excel = pd.read_excel(file_bytes)
         df = generate_df_profesores_secundaria(df_excel)
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+        st.dataframe(df)
+elif option == "Alumnado de Infantil y Primaria":
+    st.sidebar.write(TEXTS["alumnos_primaria"])
+    df_test = pd.read_csv("test_ceip.csv")
+    df_test["username"][0] = "rlop1234"
+    df_test["username"][1] = "clop5678"
+    file_bytes = st.file_uploader(
+        "Sube un archivo .xls", type=("xls", "csv"), encoding="ISO-8859-1"
+    )
+    if not file_bytes:
+        st.write("### Demo de tabla resultante")
+        st.dataframe(df_test)
+
+    else:
+        bytes_data = file_bytes.read()
+        s = str(bytes_data)
+        data = io.StringIO(s)
+        df_csv = pd.read_csv(data)
+        df = generate_df_alumnos_primaria(df_csv)
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
         st.dataframe(df)
 else:

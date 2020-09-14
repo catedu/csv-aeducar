@@ -60,8 +60,7 @@ Campos mínimos requeridos en el archivo .xls:
 * Apellidos
 * Grupo
 
-Para sacar estos datos, en GIR Académico sigue los pasos de la imagen:
-
+### Si en tu centro habéis cambiado los nombres cortos de los cursos, los alumnos se crearán en la plataforma, pero no se matricularán en los cursos.
 """,
     "maestros": """
 Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos. De momento todos los registros tendrán el mismo mail. El alumnado podrá acceder a su perfil y modificarlo ya en su moodle.
@@ -342,9 +341,12 @@ elif option == "Profesorado de Secundaria":
         st.dataframe(df)
 elif option == "Alumnado de Infantil y Primaria":
     st.sidebar.write(TEXTS["alumnos_primaria"])
-    df_test = pd.read_csv(
-        "https://raw.githubusercontent.com/catedu/csv-aeducar/master/src/test_ceip.csv"
-    )
+    try:
+        df_test = pd.read_csv("test_ceip.csv")
+    except:
+        df_test = pd.read_csv(
+            "https://raw.githubusercontent.com/catedu/csv-aeducar/master/src/test_ceip.csv"
+        )
     df_test["username"][0] = "rlop1234"
     df_test["username"][1] = "clop5678"
     df_test["firstname"][0] = "Javier"
@@ -353,10 +355,15 @@ elif option == "Alumnado de Infantil y Primaria":
         "Sube un archivo .xls", type=("xls", "csv"), encoding="ISO-8859-1"
     )
     if not file_bytes:
+        st.write(
+            "Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen:"
+        )
         st.image(
             "https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_alumnos_gir.png",
         )
-        st.write("### Demo de tabla resultante")
+        st.write(
+            "### Demo de tabla resultante al subir el .xls obtenido del GIR a esta aplicación"
+        )
         st.dataframe(df_test)
 
     else:

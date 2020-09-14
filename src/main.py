@@ -54,15 +54,14 @@ Este servicio estará disponible durante la semana del 14 al 18 de Septiembre
     """,
     "alumnos_primaria": """## Descarga tu .xls del SIGAD
 
-Para sacar estos datos, en GIR Académico sigue los pasos de la imagen:
-
-!(Descarga de datos de GIR)[https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_alumnos_gir.png]
-
 Campos mínimos requeridos en el archivo .xls:
 * Nº Alumno GIR
 * Nombre
 * Apellidos
 * Grupo
+
+Para sacar estos datos, en GIR Académico sigue los pasos de la imagen:
+
 """,
     "maestros": """
 Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos. De momento todos los registros tendrán el mismo mail. El alumnado podrá acceder a su perfil y modificarlo ya en su moodle.
@@ -295,6 +294,7 @@ hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+img {width: 100%;}
 </style>
 """
 
@@ -342,13 +342,20 @@ elif option == "Profesorado de Secundaria":
         st.dataframe(df)
 elif option == "Alumnado de Infantil y Primaria":
     st.sidebar.write(TEXTS["alumnos_primaria"])
-    df_test = pd.read_csv("test_ceip.csv")
+    df_test = pd.read_csv(
+        "https://raw.githubusercontent.com/catedu/csv-aeducar/master/src/test_ceip.csv"
+    )
     df_test["username"][0] = "rlop1234"
     df_test["username"][1] = "clop5678"
+    df_test["firstname"][0] = "Javier"
+    df_test["firstname"][1] = "Lucía"
     file_bytes = st.file_uploader(
         "Sube un archivo .xls", type=("xls", "csv"), encoding="ISO-8859-1"
     )
     if not file_bytes:
+        st.image(
+            "https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_alumnos_gir.png",
+        )
         st.write("### Demo de tabla resultante")
         st.dataframe(df_test)
 

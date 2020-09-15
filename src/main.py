@@ -69,12 +69,9 @@ Campos mínimos requeridos en el archivo .xls:
 * Nombre
 * Apellidos
 
-Campos opcionales
-* grupo
-
-#### Si en tu centro habéis cambiado los nombres cortos de los cursos, los alumnos se crearán en la plataforma, pero no se matricularán en los cursos.
-
 De momento todos los registros tendrán el mismo mail. Los maestros podrán acceder a su perfil y modificarlo ya en su moodle.
+
+**En los próximos días** habilitaremos la opción de la matriculación directa de las tutorías en sus respectivos cursos. Para ello, cada centro debe haber asignado a cada tutora su grupo en GIR.
 
 Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos.
     """,
@@ -113,43 +110,43 @@ def filterColumnsAlumnosSec(column):
 
 columns_to_add = [
     "course1",
-    "course2",
-    "course3",
-    "course4",
-    "course5",
-    "course6",
-    "course7",
-    "course8",
-    "course9",
-    "course10",
-    "course11",
-    "course12",
-    "course13",
     "group1",
-    "group2",
-    "group3",
-    "group4",
-    "group5",
-    "group6",
-    "group7",
-    "group8",
-    "group9",
-    "group10",
-    "group11",
-    "group12",
-    "group13",
     "role1",
+    "course2",
+    "group2",
     "role2",
+    "course3",
+    "group3",
     "role3",
+    "course4",
+    "group4",
     "role4",
+    "course5",
+    "group5",
     "role5",
+    "course6",
+    "group6",
     "role6",
+    "course7",
+    "group7",
     "role7",
+    "course8",
+    "group8",
     "role8",
+    "course9",
+    "group9",
     "role9",
+    "course10",
+    "group10",
     "role10",
+    "course11",
+    "group11",
     "role11",
+    "course12",
+    "group12",
     "role12",
+    "course13",
+    "group13",
     "role13",
 ]
 
@@ -242,7 +239,7 @@ def generate_df_maestros(df):
     df1["firstname"] = df["Nombre"]
     df1["lastname"] = df["Apellidos"]
     df1["email"] = "alumnado@education.catedu.es"
-    df["password"] = "changeme"
+    df1["password"] = "changeme"
     global columns_to_add
     df2 = pd.DataFrame(columns=columns_to_add)
     df1 = pd.concat([df1, df2])
@@ -307,7 +304,7 @@ def generate_df_profesores_secundaria(df):
         df["Apellido 1"].str.capitalize() + " " + df["Apellido 2"].str.capitalize()
     )
     df1["email"] = "alumnado@education.catedu.es"
-    df["password"] = "changeme"
+    df1["password"] = "changeme"
     global columns_to_add
     df2 = pd.DataFrame(columns=columns_to_add)
     df1 = pd.concat([df1, df2])
@@ -401,12 +398,21 @@ elif option == "Alumnado de Infantil y Primaria":
         st.dataframe(df)
 elif option == "Profesorado de Infantil y Primaria":
     st.sidebar.write(TEXTS["maestros"])
-    # try:
-    #     df_test = pd.read_csv("test_ceip_maestros.csv")
-    # except:
-    #     df_test = pd.read_csv(
-    #         "https://raw.githubusercontent.com/catedu/csv-aeducar/master/src/test_ceip.csv"
-    #     )
+    maestros = {
+        "Nombre": {0: "José María", 1: "María", 2: "Berta"},
+        "Apellidos": {0: "Gasca López", 1: "Arenedo Marín", 2: "Gutiérrez Sánchez"},
+        "Sexo": {0: "Hombre", 1: "Mujer", 2: "Mujer"},
+        "Documento": {0: "DNI", 1: "DNI", 2: "DNI"},
+        "Nº Documento": {0: "12345678V", 1: "87654321V", 2: "13246587V"},
+        "Localidad": {0: "Zaragoza", 1: "Zaragoza", 2: "Zaragoza"},
+        "Provincia": {0: "Zaragoza", 1: "Zaragoza", 2: "Zaragoza"},
+        "Nº Registro": {0: 20000044356345, 1: 200007044356346, 2: 200004704435634},
+        "Especialidad": {0: np.nan, 1: np.nan, 2: np.nan},
+        "Destinos Activos": {0: 2, 1: 2, 2: 2},
+        "grupo": {0: "1ia", 1: "2pb", 2: ""},
+    }
+    df_uploaded = pd.DataFrame(maestros)
+    df_test = generate_df_maestros(df_uploaded)
     file_bytes = st.file_uploader(
         "Sube un archivo .xls", type=("xls", "csv"), encoding="ISO-8859-1"
     )
@@ -417,10 +423,12 @@ elif option == "Profesorado de Infantil y Primaria":
         st.image(
             "https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_maestros_gir.png",
         )
+        st.write("### Demo de archivo tabla extraída de GIR")
+        st.dataframe(df_uploaded)
         st.write(
             "### Demo de tabla resultante al subir el .xls obtenido del GIR a esta aplicación"
         )
-        # st.dataframe(df_test)
+        st.dataframe(df_test)
 
     else:
         bytes_data = file_bytes.read()

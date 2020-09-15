@@ -62,9 +62,21 @@ Campos mínimos requeridos en el archivo .xls:
 
 ### Si en tu centro habéis cambiado los nombres cortos de los cursos, los alumnos se crearán en la plataforma, pero no se matricularán en los cursos.
 """,
-    "maestros": """
-Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos. De momento todos los registros tendrán el mismo mail. El alumnado podrá acceder a su perfil y modificarlo ya en su moodle.
-    
+    "maestros": """## Descarga tu .xls del GIR
+
+Campos mínimos requeridos en el archivo .xls:
+* Nº Documento
+* Nombre
+* Apellidos
+
+Campos opcionales
+* grupo
+
+#### Si en tu centro habéis cambiado los nombres cortos de los cursos, los alumnos se crearán en la plataforma, pero no se matricularán en los cursos.
+
+De momento todos los registros tendrán el mismo mail. Los maestros podrán acceder a su perfil y modificarlo ya en su moodle.
+
+Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos.
     """,
 }
 
@@ -224,6 +236,19 @@ def generate_df_alumnos_primaria(df):
     return df
 
 
+def generate_df_maestros(df):
+    df1 = pd.DataFrame()
+    df1["username"] = df["Nº Documento"].str.lower()
+    df1["firstname"] = df["Nombre"]
+    df1["lastname"] = df["Apellidos"]
+    df1["email"] = "alumnado@education.catedu.es"
+    df["password"] = "changeme"
+    global columns_to_add
+    df2 = pd.DataFrame(columns=columns_to_add)
+    df1 = pd.concat([df1, df2])
+    return df1
+
+
 def generate_df_alumnos_secundaria(df):
     columns = filter(filterColumnsAlumnosSec, df.columns)
     df = df.drop(columns=columns)
@@ -374,6 +399,38 @@ elif option == "Alumnado de Infantil y Primaria":
         df = generate_df_alumnos_primaria(df_csv)
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
         st.dataframe(df)
+elif option == "Profesorado de Infantil y Primaria":
+    st.sidebar.write(TEXTS["maestros"])
+    # try:
+    #     df_test = pd.read_csv("test_ceip_maestros.csv")
+    # except:
+    #     df_test = pd.read_csv(
+    #         "https://raw.githubusercontent.com/catedu/csv-aeducar/master/src/test_ceip.csv"
+    #     )
+    file_bytes = st.file_uploader(
+        "Sube un archivo .xls", type=("xls", "csv"), encoding="ISO-8859-1"
+    )
+    if not file_bytes:
+        st.write(
+            "Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen:"
+        )
+        st.image(
+            "https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_maestros_gir.png",
+        )
+        st.write(
+            "### Demo de tabla resultante al subir el .xls obtenido del GIR a esta aplicación"
+        )
+        # st.dataframe(df_test)
+
+    else:
+        bytes_data = file_bytes.read()
+        s = str(bytes_data)
+        data = io.StringIO(s)
+        df_csv = pd.read_csv(data)
+        df = generate_df_maestros(df_csv)
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+        st.dataframe(df)
+
 else:
     st.sidebar.write(TEXTS["en_progreso"])
     st.write(TEXTS["en_progreso"])

@@ -374,7 +374,7 @@ elif option == "Alumnado de Infantil y Primaria":
     df_test["firstname"][0] = "Javier"
     df_test["firstname"][1] = "Lucía"
     file_bytes = st.file_uploader(
-        "Si tienes claras las instrucciones, sube un archivo .xls",
+        "Sube un archivo .xls",
         type=("xls", "csv"),
         encoding="ISO-8859-1",
     )
@@ -416,7 +416,9 @@ elif option == "Profesorado de Infantil y Primaria":
     df_uploaded = pd.DataFrame(maestros)
     df_test = generate_df_maestros(df_uploaded)
     file_bytes = st.file_uploader(
-        "Sube un archivo .xls", type=("xls", "csv"), encoding="ISO-8859-1"
+        "Si tienes claras las instrucciones, sube un archivo .xls",
+        type=("xls", "csv"),
+        encoding="ISO-8859-1",
     )
     if not file_bytes:
         st.write(

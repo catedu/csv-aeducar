@@ -5,6 +5,7 @@ import os
 import io
 import base64
 from load_css import local_css
+import re
 
 # local_css("style.css")
 
@@ -69,9 +70,12 @@ Campos mínimos requeridos en el archivo .xls:
 * Nombre
 * Apellidos
 
+Campos opcionales:
+* grupo
+
 De momento todos los registros tendrán el mismo mail. Los maestros podrán acceder a su perfil y modificarlo ya en su moodle.
 
-**En los próximos días** habilitaremos la opción de la matriculación directa de las tutorías en sus respectivos cursos. Para ello, cada centro debe haber asignado a cada tutora su grupo en GIR.
+Para que las tutoras se matriculen en sus cursos, cada centro debe haber asignado a cada tutora su grupo en GIR.
 
 Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos.
     """,
@@ -150,38 +154,42 @@ columns_to_add = [
     "role13",
 ]
 
+text2num = {
+    "1º": "primero",
+    "2º": "segundo",
+    "3º": "tercero",
+    "4º": "cuarto",
+    "5º": "quinto",
+    "6º": "sexto",
+}
+
+cursos_inf = [
+    "proyecto6",
+    "proyecto4",
+    "proyecto3",
+    "proyecto2",
+    "proyecto1",
+    "english",
+    "proyecto5",
+]
+
+cursos_prim = [
+    "lengua",
+    "sociales",
+    "matematicas",
+    "ingles",
+    "edfisica",
+    "artistica",
+    "ciencias",
+]
+
 
 def generate_df_alumnos_primaria(df):
     to_delete = list(df.columns)
 
-    text2num = {
-        "1º": "primero",
-        "2º": "segundo",
-        "3º": "tercero",
-        "4º": "cuarto",
-        "5º": "quinto",
-        "6º": "sexto",
-    }
-
-    cursos_inf = [
-        "proyecto6",
-        "proyecto4",
-        "proyecto3",
-        "proyecto2",
-        "proyecto1",
-        "english",
-        "proyecto5",
-    ]
-
-    cursos_prim = [
-        "lengua",
-        "sociales",
-        "matematicas",
-        "ingles",
-        "edfisica",
-        "artistica",
-        "ciencias",
-    ]
+    global text2num
+    global cursos_inf
+    global cursos_prim
 
     df["Nº Alumno GIR"] = df["Nº Alumno GIR"].astype(str)
     df["email"] = "alumnado@education.catedu.es"
@@ -234,15 +242,65 @@ def generate_df_alumnos_primaria(df):
 
 
 def generate_df_maestros(df):
+    def split(word):
+        return [char for char in word]
+
+    global text2num
+    global cursos_inf
+    global cursos_prim
+
     df1 = pd.DataFrame()
     df1["username"] = df["Nº Documento"].str.lower()
     df1["firstname"] = df["Nombre"]
     df1["lastname"] = df["Apellidos"]
     df1["email"] = "alumnado@education.catedu.es"
     df1["password"] = "changeme"
-    global columns_to_add
-    df2 = pd.DataFrame(columns=columns_to_add)
-    df1 = pd.concat([df1, df2])
+    try:
+        df1["grupo"] = df["grupo"].apply(
+            lambda x: split(x)
+            if isinstance(x, str) and bool(re.match("\d(i|p)\w", x))
+            else np.nan
+        )
+        df1[["curso", "etapa", "grupo"]] = df1["grupo"].apply(pd.Series)
+        df1["course"] = df1["curso"].apply(
+            lambda x: text2num[x + "º"]
+            if isinstance(x, str) and bool(re.match("\d", x))
+            else np.nan
+        )
+        df1["group"] = df1["grupo"].apply(
+            lambda x: x.upper()
+            if isinstance(x, str) and bool(re.match("\w", x))
+            else np.nan
+        )
+
+        df1.loc[df1["etapa"] == "i", "etapa"] = "inf"
+        df1.loc[df1["etapa"] == "p", "etapa"] = "prim"
+        df1.loc[df1["etapa"] == "inf", "courses_list"] = pd.Series(
+            [cursos_inf] * len(df1)
+        )
+        df1.loc[df1["etapa"] == "prim", "courses_list"] = pd.Series(
+            [cursos_prim] * len(df1)
+        )
+
+        for item in range(1, 8):
+            df1["course" + str(item)] = df1["courses_list"].apply(
+                lambda x: x[item - 1] if isinstance(x, list) else np.nan
+            )
+            df1.loc[df1["course" + str(item)].notnull(), "course" + str(item)] = (
+                df1["course" + str(item)] + "_" + df1["course"] + "_" + df1["etapa"]
+            )
+            df1["group" + str(item)] = df1["group"]
+            df1.loc[
+                df1["group"].astype(str).str.isupper(), "role" + str(item)
+            ] = "editingteacher"
+
+        df1 = df1.drop(columns=["courses_list", "curso", "etapa", "course", "group"])
+
+    except:
+        global columns_to_add
+        df2 = pd.DataFrame(columns=columns_to_add)
+        df1 = pd.concat([df1, df2])
+
     return df1
 
 

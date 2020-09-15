@@ -256,6 +256,22 @@ def generate_df_alumnos_primaria(df):
 
 
 def generate_df_maestros(df):
+    fila_test = {
+        "Nombre": {0: "María Ángeles", 1: "María Ángeles"},
+        "Apellidos": {0: "Arenedo López", 1: "Arenedo López"},
+        "Sexo": {0: "Mujer", 1: "Mujer"},
+        "Documento": {0: "DNI", 1: "DNI"},
+        "Nº Documento": {0: "25146470V", 1: "25146470V"},
+        "Localidad": {0: "Zaragoza", 1: "Zaragoza"},
+        "Provincia": {0: "Zaragoza", 1: "Zaragoza"},
+        "Nº Registro": {0: 2514847044356345, 1: 2514847044356345},
+        "Especialidad": {0: np.nan, 1: np.nan},
+        "Destinos Activos": {0: 2, 1: 2},
+        "grupo": {0: "1ia", 1: ""},
+    }
+    df = pd.DataFrame(fila_test)
+    print(df)
+
     def split(word):
         return [char for char in word]
 
@@ -276,17 +292,17 @@ def generate_df_maestros(df):
             else np.nan
         )
         df1[["curso", "etapa", "grupo"]] = df1["grupo"].apply(pd.Series)
-        df1["curso"] = df1["curso"].apply(
+        df1["course"] = df1["curso"].apply(
             lambda x: text2num[x + "º"]
             if isinstance(x, str) and bool(re.match("\d", x))
             else np.nan
         )
-        df1["grupo"] = df1["grupo"].apply(
+        df1["group"] = df1["grupo"].apply(
             lambda x: x.upper()
             if isinstance(x, str) and bool(re.match("\w", x))
             else np.nan
         )
-        # TODO: Terminar asignación opcional de cursos
+
         df1.loc[df1["etapa"] == "i", "etapa"] = "inf"
         df1.loc[df1["etapa"] == "p", "etapa"] = "prim"
         df1.loc[df1["etapa"] == "inf", "courses_list"] = pd.Series(
@@ -297,16 +313,16 @@ def generate_df_maestros(df):
         )
 
         for item in range(1, 8):
-
-            df1["course" + str(item)] = (
-                df1["courses_list"].apply(lambda x: x[item - 1])
-                + "_"
-                + df1["curso"]
-                + "_"
-                + df1["etapa"]
+            df1["course" + str(item)] = df1["courses_list"].apply(
+                lambda x: x[item - 1] if isinstance(x, list) else np.nan
             )
-            df1["group" + str(item)] = df1["grupo"]
-            df1["role" + str(item)] = "editingteacher"
+            df1.loc[df1["course" + str(item)].notnull(), "course" + str(item)] = (
+                df1["course" + str(item)] + "_" + df1["course"] + "_" + df1["etapa"]
+            )
+            df1["group" + str(item)] = df1["group"]
+            df1.loc[
+                df1["group"].astype(str).str.isupper(), "role" + str(item)
+            ] = "editingteacher"
     except:
         global columns_to_add
         df2 = pd.DataFrame(columns=columns_to_add)

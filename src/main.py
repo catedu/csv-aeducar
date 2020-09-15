@@ -11,6 +11,8 @@ import re
 
 TEXTS = {
     "intro": """
+### **¡ATENCIÓN!** No editéis los datos descargados de GIR o SIGAD antes de subirlos a esta aplicación. Podéis editar posteriormente el archivo resultante que esta aplicación os dará.
+
 Esta aplicación sube los datos a un servidor propiedad del Gobierno de Aragón, para su tramiento y devolución al usuario.
 
 Una vez devuelto el .csv, no se conserva ningún dato en el servidor.

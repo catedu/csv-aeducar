@@ -416,13 +416,15 @@ elif option == "Profesorado de Infantil y Primaria":
     df_uploaded = pd.DataFrame(maestros)
     df_test = generate_df_maestros(df_uploaded)
     file_bytes = st.file_uploader(
-        "Si tienes claras las instrucciones, sube un archivo .xls",
+        "Sube un archivo .xls",
         type=("xls", "csv"),
         encoding="ISO-8859-1",
     )
     if not file_bytes:
         st.write(
-            "Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen:"
+            """### Instrucciones
+
+Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen:"""
         )
         st.image(
             "https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_maestros_gir.png",

@@ -158,33 +158,51 @@ def generate_df_alumnos_primaria(df):
     df["lastname"] = df["Apellidos"].str.capitalize()
     df["password"] = "changeme"
     try:
-        df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
-    except:
-        df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
-        df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
-        df.loc[df["curso"] == "Iº"] = "1º"
-    df["curso"] = df["curso"].apply(lambda x: text2num[x])
-    df["etapa"] = df["etapa"].str.lower()
-    df["grupo"] = df["grupo"].str[1]
-    df.loc[df["etapa"] == "inf", "courses_list"] = pd.Series([cursos_inf] * len(df))
-    df.loc[df["etapa"] == "prim", "courses_list"] = pd.Series([cursos_prim] * len(df))
-
-    for item in range(1, 8):
-
-        df["course" + str(item)] = (
-            df["courses_list"].apply(
-                lambda x: x[item - 1] if isinstance(x, list) else np.nan
-            )
-            + "_"
-            + df["curso"]
-            + "_"
-            + df["etapa"]
+        try:
+            df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
+        except:
+            df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
+            df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
+            df.loc[df["curso"] == "Iº"] = "1º"
+        df["curso"] = df["curso"].apply(lambda x: text2num[x])
+        df["etapa"] = df["etapa"].str.lower()
+        df["grupo"] = df["grupo"].str[1]
+        df.loc[df["etapa"] == "inf", "courses_list"] = pd.Series([cursos_inf] * len(df))
+        df.loc[df["etapa"] == "prim", "courses_list"] = pd.Series(
+            [cursos_prim] * len(df)
         )
-        df["group" + str(item)] = df["grupo"]
-        df["role" + str(item)] = "student"
+
+        for item in range(1, 8):
+
+            df["course" + str(item)] = (
+                df["courses_list"].apply(
+                    lambda x: x[item - 1] if isinstance(x, list) else np.nan
+                )
+                + "_"
+                + df["curso"]
+                + "_"
+                + df["etapa"]
+            )
+            df["group" + str(item)] = df["grupo"]
+            df["role" + str(item)] = "student"
+
+        df = df.drop(columns=["curso", "etapa", "grupo", "courses_list"])
+
+    except:
+        cols = ["curso", "etapa", "grupo", "courses_list"]
+        for c in cols:
+            if c in list(df.columns):
+                print(c)
+                df = df.drop(
+                    columns=[
+                        c,
+                    ]
+                )
+        global columns_to_add
+        df1 = pd.DataFrame(columns=columns_to_add[:21])
+        df = pd.concat([df, df1])
 
     df = df.drop(columns=to_delete)
-    df = df.drop(columns=["curso", "etapa", "grupo", "courses_list"])
 
     return df
 
@@ -371,6 +389,9 @@ elif option == "Profesorado de Secundaria":
         st.dataframe(df)
 elif option == "Alumnado de Infantil y Primaria":
     st.sidebar.write(TEXTS["alumnos_primaria"])
+    st.write(
+        "#### Solo se rellenarán los datos del curso, grupo y rol si la columna grupo tiene el siguiente formato `I3B (B)`, `P4A (A)` o `3º INF (B)`,`4º PRIM (A)`"
+    )
     try:
         df_test = pd.read_csv("test_ceip.csv")
     except:

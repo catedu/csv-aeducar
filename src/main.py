@@ -432,6 +432,9 @@ elif option == "Alumnado de Infantil y Primaria":
 
 elif option == "Profesorado de Infantil y Primaria":
     st.sidebar.write(TEXTS["maestros"])
+    st.write(
+        "#### Solo se rellenarán los datos del curso, grupo y rol si la columna grupo tiene el siguiente formato `1ia`, `2pb`"
+    )
     maestros = {
         "Nombre": {0: "José María", 1: "María", 2: "Berta"},
         "Apellidos": {0: "Gasca López", 1: "Arenedo Marín", 2: "Gutiérrez Sánchez"},

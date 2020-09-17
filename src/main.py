@@ -120,6 +120,7 @@ def generate_df_alumnos_primaria(df):
         a 3º INF (B)
         a 1º PRIM (A)
         """
+        cadena = cadena.strip()
         curso = cadena[1] + "º"
         etapa = "PRIM" if cadena[0] == "P" else "INF"
         grupo = cadena[-3:]
@@ -153,8 +154,8 @@ def generate_df_alumnos_primaria(df):
         .str.decode("utf-8")
     )
 
-    df["firstname"] = df["Nombre"]
-    df["lastname"] = df["Apellidos"]
+    df["firstname"] = df["Nombre"].str.capitalize()
+    df["lastname"] = df["Apellidos"].str.capitalize()
     df["password"] = "changeme"
     try:
         df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
@@ -291,7 +292,9 @@ def generate_df_alumnos_secundaria(df):
 
     df["firstname"] = df["NOMBRE"].str.capitalize()
     df["lastname"] = (
-        df["APELLIDO1"].str.capitalize() + " " + df["APELLIDO2"].str.capitalize()
+        df["APELLIDO1"].fillna("").str.capitalize()
+        + " "
+        + df["APELLIDO2"].fillna("").str.capitalize()
     )
     df = df.drop(columns=[column for column in df.columns if column.isupper()])
     df1 = df

@@ -6,82 +6,9 @@ import io
 import base64
 from load_css import local_css
 import re
+from texts import TEXTS
 
 # local_css("style.css")
-
-TEXTS = {
-    "intro": """
-### **¡ATENCIÓN!** No editéis los datos descargados de GIR o SIGAD antes de subirlos a esta aplicación. Podéis editar posteriormente el archivo resultante que esta aplicación os dará.
-
-Esta aplicación sube los datos a un servidor propiedad del Gobierno de Aragón, para su tramiento y devolución al usuario.
-
-Una vez devuelto el .csv, no se conserva ningún dato en el servidor.
-
-*Más instrucciones desplegando el menú de la izquierda*
-""",
-    "alumnos_secundaria": """## Descarga tu .xls del SIGAD
-
-En Utilidades -> Informes -> ALUM -> descarga Listado completo de alumnos con todos sus datos.
-
-Campos mínimos requeridos en el archivo .xls:
-* N_GIR
-* EMAIL (aunque haya registros vacíos)
-* NOMBRE
-* APELLIDO1
-* APELLIDO2
-
-Campos opcionales:
-* EMAIL_PADRE
-* EMAIL_MADRE
-
-Puedes probar el funcionamiento descargando [este archivo para tests](https://github.com/catedu/csv-aeducar/raw/master/src/prueba-alumnado.xls).
-""",
-    "profesores_secundaria": """## Descarga tu .xls del SIGAD
-
-### Sería necesario añadir el campo mail. Si alguien sabe cómo sacar estos datos del SIGAD incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos. De momento todos los registros tendrán el mismo mail. El profesorado podrá acceder a su perfil y modificarlo ya en su moodle.
-
-En Personal -> Búsqueda -> Exportar -> descarga Listado completo de profesores con todos sus datos.
-
-Campos mínimos requeridos en el archivo .xls:
-* Nombre
-* Apellido 1
-* Apellido 2
-* Nº documento
-
-Puedes probar el funcionamiento descargando [este archivo para tests](https://github.com/catedu/csv-aeducar/raw/master/src/prueba-profesorado.xls).
-""",
-    "en_progreso": """## Servicio no disponbile.
-
-Este servicio estará disponible durante la semana del 14 al 18 de Septiembre
-
-    """,
-    "alumnos_primaria": """## Descarga tu .xls del GIR
-
-Campos mínimos requeridos en el archivo .xls:
-* Nº Alumno GIR
-* Nombre
-* Apellidos
-* Grupo
-
-### Si en tu centro habéis cambiado los nombres cortos de los cursos, los alumnos se crearán en la plataforma, pero no se matricularán en los cursos.
-""",
-    "maestros": """## Descarga tu .xls del GIR
-
-Campos mínimos requeridos en el archivo .xls:
-* Nº Documento
-* Nombre
-* Apellidos
-
-Campos opcionales:
-* grupo
-
-De momento todos los registros tendrán el mismo mail. Los maestros podrán acceder a su perfil y modificarlo ya en su moodle.
-
-Para que las tutoras se matriculen en sus cursos, cada centro debe haber asignado a cada tutora su grupo en GIR.
-
-Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos.
-    """,
-}
 
 
 def get_table_download_link(df):
@@ -187,6 +114,17 @@ cursos_prim = [
 
 
 def generate_df_alumnos_primaria(df):
+    def split_alternate(cadena):
+        """
+        Convertir cosas como I3B (B) o P1ºA (A)
+        a 3º INF (B)
+        a 1º PRIM (A)
+        """
+        curso = cadena[1] + "º"
+        etapa = "PRIM" if cadena[0] == "P" else "INF"
+        grupo = cadena[-3:]
+        return " ".join([curso, etapa, grupo])
+
     to_delete = list(df.columns)
 
     global text2num
@@ -218,7 +156,12 @@ def generate_df_alumnos_primaria(df):
     df["firstname"] = df["Nombre"]
     df["lastname"] = df["Apellidos"]
     df["password"] = "changeme"
-    df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
+    try:
+        df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
+    except:
+        df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
+        df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
+        df.loc[df["curso"] == "Iº"] = "1º"
     df["curso"] = df["curso"].apply(lambda x: text2num[x])
     df["etapa"] = df["etapa"].str.lower()
     df["grupo"] = df["grupo"].str[1]
@@ -228,7 +171,9 @@ def generate_df_alumnos_primaria(df):
     for item in range(1, 8):
 
         df["course" + str(item)] = (
-            df["courses_list"].apply(lambda x: x[item - 1])
+            df["courses_list"].apply(
+                lambda x: x[item - 1] if isinstance(x, list) else np.nan
+            )
             + "_"
             + df["curso"]
             + "_"
@@ -453,11 +398,14 @@ elif option == "Alumnado de Infantil y Primaria":
     else:
         bytes_data = file_bytes.read()
         s = str(bytes_data)
+        s = s.replace("\t", ",")
         data = io.StringIO(s)
         df_csv = pd.read_csv(data)
         df = generate_df_alumnos_primaria(df_csv)
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
         st.dataframe(df)
+
+
 elif option == "Profesorado de Infantil y Primaria":
     st.sidebar.write(TEXTS["maestros"])
     maestros = {
@@ -499,6 +447,7 @@ Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen
     else:
         bytes_data = file_bytes.read()
         s = str(bytes_data)
+        s = s.replace("\t", ",")
         data = io.StringIO(s)
         df_csv = pd.read_csv(data)
         df = generate_df_maestros(df_csv)

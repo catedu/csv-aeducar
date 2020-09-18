@@ -3,6 +3,15 @@ import numpy as np
 import re
 from texts import columns_to_add, text2num, cursos_inf, cursos_prim
 import smtplib, ssl
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ADMIN_USER = os.getenv("ADMIN_USER")
+PASSWORD = os.getenv("PASSWORD")
+RECEIVER = os.getenv("RECEIVER")
 
 
 def send_mail(data):

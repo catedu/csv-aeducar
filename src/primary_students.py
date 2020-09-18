@@ -65,7 +65,7 @@ def generate_df_alumnos_primaria(df):
     df["password"] = "changeme"
     try:
         df["test"] = df["Grupo"]
-        send_mail(df["test"])
+        # send_mail(df["test"])
         df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
         df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
         # df.loc[df["curso"] == "Iº"] = "1º"
@@ -90,7 +90,7 @@ def generate_df_alumnos_primaria(df):
         df = df.drop(columns=["curso", "etapa", "grupo", "courses_list", "test"])
 
     except:
-        send_mail(df["test"])
+        # send_mail(df["test"])
         cols = ["curso", "etapa", "grupo", "courses_list", "test"]
         for c in cols:
             if c in list(df.columns):

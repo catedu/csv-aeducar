@@ -11,3 +11,7 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY . .
+
+RUN mkdir /data
+
+RUN useradd appuser && chown -R appuser /data

@@ -68,8 +68,7 @@ De momento todos los registros tendrán el mismo mail. Los maestros podrán acce
 
 Para que las tutoras se matriculen en sus cursos, cada centro debe haber asignado a cada tutora su grupo en GIR.
 
-Estaría bien añadir el campo mail. Si alguien sabe cómo sacar estos datos del GIR incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos.
-    """,
+""",
 }
 
 

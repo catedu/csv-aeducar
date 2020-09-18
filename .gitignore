@@ -4,3 +4,5 @@ venv
 *.pyc
 streamlit_venv
 *.ipynb
+mail.txt
+.env

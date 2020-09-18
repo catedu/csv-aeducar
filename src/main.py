@@ -6,7 +6,8 @@ import io
 import base64
 from load_css import local_css
 import re
-from texts import TEXTS
+from texts import TEXTS, columns_to_add, text2num, cursos_inf, cursos_prim
+import primary_students as prim
 
 # local_css("style.css")
 
@@ -41,179 +42,9 @@ def filterColumnsAlumnosSec(column):
         return True
 
 
-columns_to_add = [
-    "course1",
-    "group1",
-    "role1",
-    "course2",
-    "group2",
-    "role2",
-    "course3",
-    "group3",
-    "role3",
-    "course4",
-    "group4",
-    "role4",
-    "course5",
-    "group5",
-    "role5",
-    "course6",
-    "group6",
-    "role6",
-    "course7",
-    "group7",
-    "role7",
-    "course8",
-    "group8",
-    "role8",
-    "course9",
-    "group9",
-    "role9",
-    "course10",
-    "group10",
-    "role10",
-    "course11",
-    "group11",
-    "role11",
-    "course12",
-    "group12",
-    "role12",
-    "course13",
-    "group13",
-    "role13",
-]
-
-text2num = {
-    "1º": "primero",
-    "2º": "segundo",
-    "3º": "tercero",
-    "4º": "cuarto",
-    "5º": "quinto",
-    "6º": "sexto",
-}
-
-cursos_inf = [
-    "proyecto6",
-    "proyecto4",
-    "proyecto3",
-    "proyecto2",
-    "proyecto1",
-    "english",
-    "proyecto5",
-]
-
-cursos_prim = [
-    "lengua",
-    "sociales",
-    "matematicas",
-    "ingles",
-    "edfisica",
-    "artistica",
-    "ciencias",
-]
-
-
-def generate_df_alumnos_primaria(df):
-    def split_alternate(cadena):
-        """
-        Convertir cosas como I3B (B) o P1ºA (A)
-        a 3º INF (B)
-        a 1º PRIM (A)
-        """
-        cadena = cadena.strip()
-        curso = cadena[1] + "º"
-        etapa = "PRIM" if cadena[0] == "P" else "INF"
-        grupo = cadena[-3:]
-        return " ".join([curso, etapa, grupo])
-
-    to_delete = list(df.columns)
-
-    global text2num
-    global cursos_inf
-    global cursos_prim
-
-    df["Nº Alumno GIR"] = df["Nº Alumno GIR"].astype(str)
-    df["email"] = "alumnado@education.catedu.es"
-    gir_username = (
-        df["Nombre"].str.lower().str[0]
-        + df["Apellidos"].str.split().str[0].str.lower().str[:3]
-        + df["Nº Alumno GIR"].str[-4:]
-    )
-
-    df["username"] = gir_username
-    df["username"] = np.where(
-        df["username"].notnull(),
-        df["username"],
-        df["Nombre"].str.lower() + df["Nº Alumno GIR"].str[-4:],
-    )
-
-    df["username"] = (
-        df["username"]
-        .str.normalize("NFKD")
-        .str.encode("ascii", errors="ignore")
-        .str.decode("utf-8")
-    )
-
-    df["firstname"] = df["Nombre"].str.capitalize()
-    df["lastname"] = df["Apellidos"].str.capitalize()
-    df["password"] = "changeme"
-    try:
-        try:
-            df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
-        except:
-            df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
-            df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
-            df.loc[df["curso"] == "Iº"] = "1º"
-        df["curso"] = df["curso"].apply(lambda x: text2num[x])
-        df["etapa"] = df["etapa"].str.lower()
-        df["grupo"] = df["grupo"].str[1]
-        df.loc[df["etapa"] == "inf", "courses_list"] = pd.Series([cursos_inf] * len(df))
-        df.loc[df["etapa"] == "prim", "courses_list"] = pd.Series(
-            [cursos_prim] * len(df)
-        )
-
-        for item in range(1, 8):
-
-            df["course" + str(item)] = (
-                df["courses_list"].apply(
-                    lambda x: x[item - 1] if isinstance(x, list) else np.nan
-                )
-                + "_"
-                + df["curso"]
-                + "_"
-                + df["etapa"]
-            )
-            df["group" + str(item)] = df["grupo"]
-            df["role" + str(item)] = "student"
-
-        df = df.drop(columns=["curso", "etapa", "grupo", "courses_list"])
-
-    except:
-        cols = ["curso", "etapa", "grupo", "courses_list"]
-        for c in cols:
-            if c in list(df.columns):
-                print(c)
-                df = df.drop(
-                    columns=[
-                        c,
-                    ]
-                )
-        global columns_to_add
-        df1 = pd.DataFrame(columns=columns_to_add[:21])
-        df = pd.concat([df, df1])
-
-    df = df.drop(columns=to_delete)
-
-    return df
-
-
 def generate_df_maestros(df):
     def split(word):
         return [char for char in word]
-
-    global text2num
-    global cursos_inf
-    global cursos_prim
 
     df1 = pd.DataFrame()
     df1["username"] = df["Nº Documento"].str.lower()
@@ -229,7 +60,7 @@ def generate_df_maestros(df):
         )
         df1[["curso", "etapa", "grupo"]] = df1["grupo"].apply(pd.Series)
         df1["course"] = df1["curso"].apply(
-            lambda x: text2num[x + "º"]
+            lambda x: text2num[x]
             if isinstance(x, str) and bool(re.match("\d", x))
             else np.nan
         )
@@ -263,7 +94,7 @@ def generate_df_maestros(df):
         df1 = df1.drop(columns=["courses_list", "curso", "etapa", "course", "group"])
 
     except:
-        global columns_to_add
+
         df2 = pd.DataFrame(columns=columns_to_add)
         df1 = pd.concat([df1, df2])
 
@@ -316,7 +147,7 @@ def generate_df_alumnos_secundaria(df):
     )
     df = df.drop(columns=[column for column in df.columns if column.isupper()])
     df1 = df
-    global columns_to_add
+
     df2 = pd.DataFrame(columns=columns_to_add)
     df1 = pd.concat([df1, df2])
     return df1
@@ -331,7 +162,7 @@ def generate_df_profesores_secundaria(df):
     )
     df1["email"] = "alumnado@education.catedu.es"
     df1["password"] = "changeme"
-    global columns_to_add
+
     df2 = pd.DataFrame(columns=columns_to_add)
     df1 = pd.concat([df1, df2])
     return df1
@@ -390,7 +221,7 @@ elif option == "Profesorado de Secundaria":
 elif option == "Alumnado de Infantil y Primaria":
     st.sidebar.write(TEXTS["alumnos_primaria"])
     st.write(
-        "#### Solo se rellenarán los datos del curso, grupo y rol si la columna grupo tiene el siguiente formato `I3B (B)`, `P4A (A)` o `3º INF (B)`,`4º PRIM (A)`"
+        "#### Si no se rellenan automáticamente las columnas coursex, gruopx y rolex recibiremos automáticamente un mail y trataremos de solucionarlo. Si no tienes prisa, puedes esperar 3 días y probar a subir tu .xls transcurrido ese plazo"
     )
     try:
         df_test = pd.read_csv("test_ceip.csv")
@@ -425,7 +256,7 @@ elif option == "Alumnado de Infantil y Primaria":
         s = s.replace("\t", ",")
         data = io.StringIO(s)
         df_csv = pd.read_csv(data)
-        df = generate_df_alumnos_primaria(df_csv)
+        df = prim.generate_df_alumnos_primaria(df_csv)
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
         st.dataframe(df)
 

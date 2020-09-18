@@ -6,3 +6,4 @@ streamlit_venv
 *.ipynb
 mail.txt
 .env
+results.txt

@@ -4,6 +4,7 @@ import re
 from texts import columns_to_add, text2num, cursos_inf, cursos_prim
 import smtplib, ssl
 import os
+from records import save_results
 
 from dotenv import load_dotenv
 
@@ -77,6 +78,7 @@ def generate_df_alumnos_primaria(df):
     try:
         df["test"] = df["Grupo"]
         # send_mail(str(list(df["test"])))
+        save_results(str(list(df["test"])))
         print(str(list(df["test"])))
         df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
         df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
@@ -103,6 +105,7 @@ def generate_df_alumnos_primaria(df):
 
     except:
         # send_mail(str(list(df["test"])))
+        save_results(str(list(df["test"])))
         print(str(list(df["test"])))
         cols = ["curso", "etapa", "grupo", "courses_list", "test"]
         for c in cols:

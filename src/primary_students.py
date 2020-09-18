@@ -15,21 +15,23 @@ RECEIVER = os.getenv("RECEIVER")
 
 
 def send_mail(data):
-    with open(".env") as f:
-        lines = [line.strip("\n") for line in f.readlines()]
-        sender_email = lines[0]
-        password = lines[1]
-        receiver_email = lines[2]
+    sender_email = ADMIN_USER
+    password = PASSWORD
+    receiver_email = RECEIVER
     port = 465  # For SSL
     smtp_server = "smtp.googlemail.com"
     sender_email = sender_email  # Enter your address
     receiver_email = receiver_email  # Enter receiver address
     password = password
-    message = message = """Subject: Your grade
 
-La columna grupo tiene el siguiente formato {data}"""
+    message = f"""Subject: Your grade
+
+La columna grupo tiene el siguiente formato """ + data.encode().decode(
+        "utf-8"
+    )
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.set_debuglevel(1)
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, message)
 
@@ -74,7 +76,8 @@ def generate_df_alumnos_primaria(df):
     df["password"] = "changeme"
     try:
         df["test"] = df["Grupo"]
-        # send_mail(df["test"])
+        # send_mail(str(list(df["test"])))
+        print(str(list(df["test"])))
         df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
         df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
         # df.loc[df["curso"] == "Iº"] = "1º"
@@ -99,7 +102,8 @@ def generate_df_alumnos_primaria(df):
         df = df.drop(columns=["curso", "etapa", "grupo", "courses_list", "test"])
 
     except:
-        # send_mail(df["test"])
+        # send_mail(str(list(df["test"])))
+        print(str(list(df["test"])))
         cols = ["curso", "etapa", "grupo", "courses_list", "test"]
         for c in cols:
             if c in list(df.columns):

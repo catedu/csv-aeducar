@@ -63,6 +63,7 @@ Pygments==2.6.1
 pyparsing==2.4.7
 pyrsistent==0.17.2
 python-dateutil==2.8.1
+python-dotenv==0.14.0
 python-slugify==4.0.1
 pytz==2020.1
 PyYAML==5.3.1

@@ -99,13 +99,13 @@ def generate_df_alumnos_primaria(df):
             )
             df["group" + str(item)] = df["grupo"].str.upper()
             df["role" + str(item)] = "student"
-        
-        save_results('Well done!')
+
+        save_results("Well done!")
         df = df.drop(columns=["curso", "etapa", "grupo", "courses_list", "test"])
 
     except:
         # send_mail(str(list(df["test"])))
-        save_results('Fallo ' + str(list(df["test"])))
+        save_results("Fallo ##############################" + str(df.to_dict()))
         cols = ["curso", "etapa", "grupo", "courses_list", "test"]
         for c in cols:
             if c in list(df.columns):

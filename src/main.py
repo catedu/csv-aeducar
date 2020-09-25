@@ -200,6 +200,7 @@ st.set_option("deprecation.showfileUploaderEncoding", False)
 
 if option == "":
     st.write(TEXTS["intro"])
+    st.video("http://youtu.be/3jlNUmzcHLo?hd=1")
 elif option == "Alumnado de Secundaria":
     st.sidebar.write(TEXTS["alumnos_secundaria"])
     file_bytes = st.file_uploader("Sube un archivo .xls", type=("xls"))

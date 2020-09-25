@@ -104,7 +104,6 @@ def generate_df_alumnos_primaria(df):
         df = df.drop(columns=["curso", "etapa", "grupo", "courses_list", "test"])
 
     except:
-        # send_mail(str(list(df["test"])))
         save_results("Fallo ##############################" + str(df.to_dict()))
         cols = ["curso", "etapa", "grupo", "courses_list", "test"]
         for c in cols:

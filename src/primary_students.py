@@ -37,7 +37,7 @@ La columna grupo tiene el siguiente formato """ + data.encode().decode(
         server.sendmail(sender_email, receiver_email, message)
 
 
-def generate_df_alumnos_primaria(df):
+def generate_df_alumnos_primaria(df, cohort):
     def split_alternate(cadena):
         """
         Extraer curso etapa y grupo
@@ -75,47 +75,54 @@ def generate_df_alumnos_primaria(df):
     df["firstname"] = df["Nombre"].str.capitalize()
     df["lastname"] = df["Apellidos"].str.capitalize()
     df["password"] = "changeme"
-    try:
-        df["test"] = df["Grupo"]
-        # send_mail(str(list(df["test"])))
-        df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
-        df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
-        # df.loc[df["curso"] == "Iº"] = "1º"
-        df["curso"] = df["curso"].apply(lambda x: text2num[x])
-        df.loc[df["etapa"] == "i", "courses_list"] = pd.Series([cursos_inf] * len(df))
-        df.loc[df["etapa"] == "p", "courses_list"] = pd.Series([cursos_prim] * len(df))
-        df["etapa"] = df["etapa"].apply(lambda x: "inf" if x == "i" else "prim")
-
-        for item in range(1, 8):
-
-            df["course" + str(item)] = (
-                df["courses_list"].apply(
-                    lambda x: x[item - 1] if isinstance(x, list) else np.nan
-                )
-                + "_"
-                + df["curso"]
-                + "_"
-                + df["etapa"]
+    if cohort:
+        df["cohort1"] = df["Grupo"]
+    else:
+        try:
+            df["test"] = df["Grupo"]
+            # send_mail(str(list(df["test"])))
+            df["Grupo"] = df["Grupo"].apply(lambda x: split_alternate(x))
+            df[["curso", "etapa", "grupo"]] = df["Grupo"].str.split(expand=True)
+            # df.loc[df["curso"] == "Iº"] = "1º"
+            df["curso"] = df["curso"].apply(lambda x: text2num[x])
+            df.loc[df["etapa"] == "i", "courses_list"] = pd.Series(
+                [cursos_inf] * len(df)
             )
-            df["group" + str(item)] = df["grupo"].str.upper()
-            df["role" + str(item)] = "student"
+            df.loc[df["etapa"] == "p", "courses_list"] = pd.Series(
+                [cursos_prim] * len(df)
+            )
+            df["etapa"] = df["etapa"].apply(lambda x: "inf" if x == "i" else "prim")
 
-        save_results("Well done!")
-        df = df.drop(columns=["curso", "etapa", "grupo", "courses_list", "test"])
+            for item in range(1, 8):
 
-    except:
-        save_results("Fallo ##############################" + str(df.to_dict()))
-        cols = ["curso", "etapa", "grupo", "courses_list", "test"]
-        for c in cols:
-            if c in list(df.columns):
-                df = df.drop(
-                    columns=[
-                        c,
-                    ]
+                df["course" + str(item)] = (
+                    df["courses_list"].apply(
+                        lambda x: x[item - 1] if isinstance(x, list) else np.nan
+                    )
+                    + "_"
+                    + df["curso"]
+                    + "_"
+                    + df["etapa"]
                 )
-        global columns_to_add
-        df1 = pd.DataFrame(columns=columns_to_add[:21])
-        df = pd.concat([df, df1])
+                df["group" + str(item)] = df["grupo"].str.upper()
+                df["role" + str(item)] = "student"
+
+            # save_results("Well done!")
+            df = df.drop(columns=["curso", "etapa", "grupo", "courses_list", "test"])
+
+        except:
+            # save_results("Fallo ##############################" + str(df.to_dict()))
+            cols = ["curso", "etapa", "grupo", "courses_list", "test"]
+            for c in cols:
+                if c in list(df.columns):
+                    df = df.drop(
+                        columns=[
+                            c,
+                        ]
+                    )
+            global columns_to_add
+            df1 = pd.DataFrame(columns=columns_to_add[:21])
+            df = pd.concat([df, df1])
 
     df = df.drop(columns=to_delete)
 

@@ -72,8 +72,8 @@ def generate_df_alumnos_primaria(df, cohort):
         .str.decode("utf-8")
     )
 
-    df["firstname"] = df["Nombre"].str.capitalize()
-    df["lastname"] = df["Apellidos"].str.capitalize()
+    df["firstname"] = df["Nombre"].str.title()
+    df["lastname"] = df["Apellidos"].str.title()
     df["password"] = "changeme"
     if cohort:
         df["cohort1"] = df["Grupo"]

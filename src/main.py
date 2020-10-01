@@ -146,11 +146,11 @@ def generate_df_alumnos_secundaria(df, cohort):
         .str.decode("utf-8")
     )
 
-    df["firstname"] = df["NOMBRE"].str.capitalize()
+    df["firstname"] = df["NOMBRE"].str.title()
     df["lastname"] = (
-        df["APELLIDO1"].fillna("").str.capitalize()
+        df["APELLIDO1"].fillna("").str.title()
         + " "
-        + df["APELLIDO2"].fillna("").str.capitalize()
+        + df["APELLIDO2"].fillna("").str.title()
     )
 
     if cohort:
@@ -168,10 +168,8 @@ def generate_df_alumnos_secundaria(df, cohort):
 def generate_df_profesores_secundaria(df, cohort):
     df1 = pd.DataFrame()
     df1["username"] = df["Nº documento"].str.lower()
-    df1["firstname"] = df["Nombre"].str.capitalize()
-    df1["lastname"] = (
-        df["Apellido 1"].str.capitalize() + " " + df["Apellido 2"].str.capitalize()
-    )
+    df1["firstname"] = df["Nombre"].str.title()
+    df1["lastname"] = df["Apellido 1"].str.title() + " " + df["Apellido 2"].str.title()
     df1["email"] = "alumnado@education.catedu.es"
     df1["password"] = "changeme"
 

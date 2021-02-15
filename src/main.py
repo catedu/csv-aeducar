@@ -352,7 +352,8 @@ Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen
 
 elif option == "Centros de Educación de Adultos":
     st.markdown(
-        """<embed src="https://github.com/catedu/csv-aeducar/raw/master/src/assets/tuto-subida-masiva-usuarios-EPA.pdf" width="400" height="400">""",
+        """<embed src="https://drive.google.com/viewerng/
+viewer?embedded=true&url=https://github.com/catedu/csv-aeducar/raw/master/src/assets/tuto-subida-masiva-usuarios-EPA.pdf" width="100%" height="980px">""",
         unsafe_allow_html=True,
     )
 

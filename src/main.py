@@ -207,6 +207,7 @@ option = st.sidebar.selectbox(
         "Alumnado de Secundaria",
         "Profesorado de Infantil y Primaria",
         "Profesorado de Secundaria",
+        "Centros de Educación de Adultos",
     ],
 )
 
@@ -348,6 +349,12 @@ Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen
             df = generate_df_maestros(df_csv, cohort)
         st.markdown(get_table_download_link(df), unsafe_allow_html=True)
         st.dataframe(df)
+
+elif option == "Centros de Educación de Adultos":
+    st.markdown(
+        """<embed src="https://github.com/catedu/csv-aeducar/raw/master/src/assets/tuto-subida-masiva-usuarios-EPA.pdf" width="400" height="400">""",
+        unsafe_allow_html=True,
+    )
 
 else:
     st.sidebar.write(TEXTS["en_progreso"])

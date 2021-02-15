@@ -1,2 +1,3 @@
 # [server]
 # port = 8501
+server.enableCORS = True

@@ -54,7 +54,7 @@ def send_mail(csv_file=None):
 
     text = message.as_string()
 
-    with smtplib.SMTP("smtp.gmail.com", port) as server:
+    with smtplib.SMTP("smtp.aragon.es", port) as server:
         try:
             server.set_debuglevel(True)
             # identify ourselves, prompting server for supported features

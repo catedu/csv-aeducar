@@ -139,8 +139,8 @@ def send_error_file(uploadedfile):
 
 hide_streamlit_style = """
 <style>
-#MainMenu {visibility: visible;}
-footer {visibility: visible;}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
 img {width: 100%;}
 </style>
 """

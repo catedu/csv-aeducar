@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv("src/.env")
 
-port = 465
+port = 587
 subject = "Error en csv"
 body = ""
 sender_email = os.getenv("EMAIL_SENDER")
@@ -54,14 +54,12 @@ def send_mail(csv_file=None):
 
     text = message.as_string()
 
-    # Create a secure SSL context
-    context = ssl.create_default_context()
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+    with smtplib.SMTP("smtp.gmail.com", port) as server:
         try:
+            server.starttls()
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, text)
-            sleep(10)
+            sleep(2)
         except:
             print("Error de autenticación")
 

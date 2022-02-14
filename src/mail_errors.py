@@ -56,6 +56,9 @@ def send_mail(csv_file=None):
 
     with smtplib.SMTP("smtp.gmail.com", port) as server:
         try:
+            server.set_debuglevel(True)
+            # identify ourselves, prompting server for supported features
+            server.ehlo()
             server.starttls()
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, text)

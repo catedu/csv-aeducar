@@ -65,4 +65,4 @@ def send_mail(csv_file=None):
 
 
 if __name__ == "__main__":
-    send_mail(Path("example.csv"))
+    send_mail(Path("prueba-alumnado.xls"))

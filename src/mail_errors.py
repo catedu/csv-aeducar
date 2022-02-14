@@ -60,6 +60,7 @@ def send_mail(csv_file=None):
             # identify ourselves, prompting server for supported features
             server.ehlo()
             server.starttls()
+            server.esmtp_features["auth"] = "LOGIN"
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, text)
             sleep(2)

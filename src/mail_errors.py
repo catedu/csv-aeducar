@@ -12,7 +12,7 @@ from email.mime.text import MIMEText
 
 from dotenv import load_dotenv
 
-load_dotenv("src/.env")
+load_dotenv(".env")
 
 port = 587
 subject = "Error en csv"

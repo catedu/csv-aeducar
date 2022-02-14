@@ -10,7 +10,9 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-load_dotenv(find_dotenv())
+from dotenv import load_dotenv
+
+load_dotenv("src/.env")
 
 port = 465
 subject = "Error en csv"

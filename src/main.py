@@ -16,7 +16,7 @@ def notify_conversion_success(filename):
     }
     data = '{"text": "Ha sido descargado correctamente ' + filename + '"}'
     requests.post(
-        "https://hooks.slack.com/services/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",
+        "https://hooks.slack.com/services/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",
         headers=headers,
         data=data,
     )

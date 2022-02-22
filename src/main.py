@@ -197,14 +197,16 @@ elif option == "Alumnado":
                 df = generate_df_alumnos_secundaria(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
-            mailing.send_success_mail(file_bytes.name)
+            os.system(f"echo {file_bytes.name} > success.txt")
         except:
             try:
                 send_error_file(file_bytes)
+                os.system(f"echo {file_bytes.name} > errors.txt")
             except:
                 st.error(
                     "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
                 )
+                os.system(f"echo {file_bytes.name} > errors.txt")
 
 
 elif option == "Profesorado":
@@ -221,14 +223,16 @@ elif option == "Profesorado":
                 df = generate_df_profesores_secundaria(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
-            mailing.send_success_mail(file_bytes.name)
+            os.system(f"echo {file_bytes.name} > success.txt")
         except:
             try:
                 send_error_file(file_bytes)
+                os.system(f"echo {file_bytes.name} > errors.txt")
             except:
                 st.error(
                     "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
                 )
+                os.system(f"echo {file_bytes.name} > errors.txt")
 
 elif option == "Centros de Educación de Adultos":
     st.markdown(

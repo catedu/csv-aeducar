@@ -7,6 +7,19 @@ import base64
 import re
 from texts import TEXTS, columns_to_add, text2num, cursos_inf, cursos_prim
 import mail_errors
+import requests
+
+
+def notify_conversion_success(filename):
+    headers = {
+        "Content-type": "application/json",
+    }
+    data = '{"text": "Ha sido descargado con éxito ' + filename + '"}'
+    requests.post(
+        "https://hooks.slack.com/services/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",
+        headers=headers,
+        data=data,
+    )
 
 
 def get_table_download_link(df):
@@ -183,6 +196,7 @@ elif option == "Alumnado":
                 df = generate_df_alumnos_secundaria(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
+            notify_conversion_success(file_bytes.name)
         except:
             send_error_file(file_bytes)
 
@@ -201,6 +215,7 @@ elif option == "Profesorado":
                 df = generate_df_profesores_secundaria(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
+            notify_conversion_success(file_bytes.name)
         except:
             send_error_file(file_bytes)
 

@@ -23,7 +23,6 @@ Campos opcionales:
 * EMAIL_PADRE
 * EMAIL_MADRE
 
-Puedes probar el funcionamiento descargando [este archivo para tests](https://github.com/catedu/csv-aeducar/raw/master/src/prueba-alumnado.xls).
 """,
     "profesores_secundaria": """## Descarga tu .xls del SIGAD
 

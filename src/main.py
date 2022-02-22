@@ -184,7 +184,12 @@ elif option == "Alumnado":
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
         except:
-            send_error_file(file_bytes)
+            try:
+                send_error_file(file_bytes)
+            except:
+                st.error(
+                    "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
+                )
 
 
 elif option == "Profesorado":
@@ -202,7 +207,12 @@ elif option == "Profesorado":
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
         except:
-            send_error_file(file_bytes)
+            try:
+                send_error_file(file_bytes)
+            except:
+                st.error(
+                    "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
+                )
 
 elif option == "Centros de Educación de Adultos":
     st.markdown(

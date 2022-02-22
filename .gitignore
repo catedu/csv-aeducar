@@ -9,3 +9,5 @@ mail.txt
 results.txt
 *.xls
 __pycache__
+errors.txt
+success.txt

@@ -7,3 +7,5 @@ streamlit_venv
 mail.txt
 .env
 results.txt
+*.xls
+__pycache__

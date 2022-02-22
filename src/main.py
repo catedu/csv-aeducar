@@ -6,7 +6,21 @@ import io
 import base64
 import re
 from texts import TEXTS, columns_to_add, text2num, cursos_inf, cursos_prim
-import mail_errors
+import mailing
+
+# import requests
+
+
+# def notify_conversion_success(filename):
+#     headers = {
+#         "Content-type": "application/json",
+#     }
+#     data = '{"text": "Ha sido descargado correctamente ' + filename + '"}'
+#     requests.post(
+#         "https://hooks.slack.com/services/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",
+#         headers=headers,
+#         data=data,
+#     )
 
 
 def get_table_download_link(df):
@@ -126,12 +140,12 @@ def send_error_file(uploadedfile):
             placeholder="micorreo@example.com",
             disabled=False,
         ):
-            mail_errors.body = f"Ponerte en contacto con {mail}"
+            mailing.body = f"Ponerte en contacto con {mail}"
             try:
-                mail_errors.send_mail(uploadedfile.name)
+                mailing.send_error_mail(uploadedfile.name)
                 os.remove(uploadedfile.name)
             except:
-                mail_errors.send_mail()
+                mailing.send_error_mail(uploadedfile.name)
             return st.success(
                 "Gracias por enviarnos tu contacto. En breve nos pondremos en contacto contigo. Si no lo hacemos, escríbenos a soportecatedu@educa.aragon.es"
             )

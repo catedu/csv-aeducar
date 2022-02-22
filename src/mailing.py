@@ -22,7 +22,7 @@ receiver_email = "asesor@catedu.es"
 password = os.getenv("EMAIL_PASS")
 
 
-def send_mail(csv_file=None):
+def send_error_mail(csv_file=None):
     # Crea un multipart email y setea los headers
     message = MIMEMultipart()
     message["From"] = sender_email
@@ -68,5 +68,33 @@ def send_mail(csv_file=None):
             print("Error de autenticación")
 
 
+def send_success_mail(filename):
+    # Crea un multipart email y setea los headers
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+    body = f"Ha sido descargado correctamente {filename}"
+
+    # Add body to email
+    message.attach(MIMEText(body, "plain"))
+
+    text = message.as_string()
+
+    with smtplib.SMTP("smtp.aragon.es", port) as server:
+        try:
+            server.set_debuglevel(True)
+            # identify ourselves, prompting server for supported features
+            server.ehlo()
+            server.starttls()
+            server.esmtp_features["auth"] = "LOGIN"
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, text)
+            sleep(2)
+        except:
+            print("Error de autenticación")
+
+
 if __name__ == "__main__":
-    send_mail(Path("prueba-alumnado.xls"))
+    send_error_mail(Path("prueba-alumnado.xls"))
+    # send_success_mail("prueba-alumnado.xls")

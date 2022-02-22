@@ -199,7 +199,12 @@ elif option == "Alumnado":
             st.dataframe(df)
             mailing.send_success_mail(file_bytes.name)
         except:
-            send_error_file(file_bytes)
+            try:
+                send_error_file(file_bytes)
+            except:
+                st.error(
+                    "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
+                )
 
 
 elif option == "Profesorado":
@@ -218,7 +223,12 @@ elif option == "Profesorado":
             st.dataframe(df)
             mailing.send_success_mail(file_bytes.name)
         except:
-            send_error_file(file_bytes)
+            try:
+                send_error_file(file_bytes)
+            except:
+                st.error(
+                    "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
+                )
 
 elif option == "Centros de Educación de Adultos":
     st.markdown(

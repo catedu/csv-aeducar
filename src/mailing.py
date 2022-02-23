@@ -35,7 +35,7 @@ def notify_conversion_success(filename):
     )
     print(r)
 
-def send_error_mail(csv_file=None):
+def send_error_mail(zlx_file):
     # Crea un multipart email y setea los headers
     message = MIMEMultipart()
     message["From"] = sender_email
@@ -45,9 +45,9 @@ def send_error_mail(csv_file=None):
     # Add body to email
     message.attach(MIMEText(body, "plain"))
 
-    if csv_file:
+    if zlx_file:
         # Open PDF file in binary mode
-        with open(csv_file, "rb") as attachment:
+        with open(zlx_file, "rb") as attachment:
             # Add file as application/octet-stream
             # Email client can usually download this automatically as attachment
             part = MIMEBase("application", "octet-stream")
@@ -59,7 +59,8 @@ def send_error_mail(csv_file=None):
         # Add header as key/value pair to attachment part
         part.add_header(
             "Content-Disposition",
-            f"attachment; filename= {csv_file}",
+            "attachment", 
+            filename= zlx_file.split('/')[1],
         )
 
         # Add attachment to message and convert message to string

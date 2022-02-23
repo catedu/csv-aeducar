@@ -1,5 +1,6 @@
 from dotenv import load_dotenv, find_dotenv
 
+import requests
 from pathlib import Path
 import smtplib, ssl
 import os
@@ -12,8 +13,9 @@ from email.mime.text import MIMEText
 
 from dotenv import load_dotenv
 
-load_dotenv(".env")
+load_dotenv("src/.env")
 
+SLACK_WEBHOOK = os.getenv("SLACK_WEBHOOK")
 port = 587
 subject = "Error en csv"
 body = ""
@@ -21,6 +23,17 @@ sender_email = os.getenv("EMAIL_SENDER")
 receiver_email = "asesor@catedu.es"
 password = os.getenv("EMAIL_PASS")
 
+def notify_conversion_success(filename):
+    headers = {
+        "Content-type": "application/json",
+    }
+    data = '{"text": "Ha sido descargado correctamente ' + filename + '"}'
+    r = requests.post(
+        SLACK_WEBHOOK,
+        headers=headers,
+        data=data,
+    )
+    print(r)
 
 def send_error_mail(csv_file=None):
     # Crea un multipart email y setea los headers
@@ -96,5 +109,6 @@ def send_success_mail(filename):
 
 
 if __name__ == "__main__":
-    send_error_mail(Path("prueba-alumnado.xls"))
+    # send_error_mail(Path("prueba-alumnado.xls"))
     # send_success_mail("prueba-alumnado.xls")
+    notify_conversion_success("hooooola.txt")

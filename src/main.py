@@ -8,20 +8,7 @@ import re
 from texts import TEXTS, columns_to_add, text2num, cursos_inf, cursos_prim
 import mailing
 
-# import requests
-
-
-# def notify_conversion_success(filename):
-#     headers = {
-#         "Content-type": "application/json",
-#     }
-#     data = '{"text": "Ha sido descargado correctamente ' + filename + '"}'
-#     requests.post(
-#         "https://hooks.slack.com/services/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",
-#         headers=headers,
-#         data=data,
-#     )
-
+import requests
 
 def get_table_download_link(df):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
@@ -127,7 +114,8 @@ def generate_df_profesores_secundaria(df, cohort):
 
 
 def send_error_file(uploadedfile):
-    with open(uploadedfile.name, "wb") as f:
+    file_path = f"data/{uploadedfile.name}"
+    with open(file_path, "wb") as f:
         f.write(uploadedfile.getbuffer())
         st.error(
             "Ha habido un problema en el procesamiento del archivo. Introduce tu mail a continuación para que podamos ponernos en contacto contigo."
@@ -142,10 +130,10 @@ def send_error_file(uploadedfile):
         ):
             mailing.body = f"Ponerte en contacto con {mail}"
             try:
-                mailing.send_error_mail(uploadedfile.name)
-                os.remove(uploadedfile.name)
+                mailing.send_error_mail(file_path)
+                os.remove(file_path)
             except:
-                mailing.send_error_mail(uploadedfile.name)
+                mailing.send_error_mail(file_path)
             return st.success(
                 "Gracias por enviarnos tu contacto. En breve nos pondremos en contacto contigo. Si no lo hacemos, escríbenos a soportecatedu@educa.aragon.es"
             )
@@ -197,16 +185,13 @@ elif option == "Alumnado":
                 df = generate_df_alumnos_secundaria(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
-            os.system(f"echo {file_bytes.name} > success.txt")
         except:
             try:
                 send_error_file(file_bytes)
-                os.system(f"echo {file_bytes.name} > errors.txt")
             except:
                 st.error(
                     "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
                 )
-                os.system(f"echo {file_bytes.name} > errors.txt")
 
 
 elif option == "Profesorado":
@@ -223,16 +208,15 @@ elif option == "Profesorado":
                 df = generate_df_profesores_secundaria(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
-            os.system(f"echo {file_bytes.name} > success.txt")
+            # mailing.notify_conversion_success(file_bytes.name)
+            mailing.send_success_mail(file_bytes.name)
         except:
             try:
                 send_error_file(file_bytes)
-                os.system(f"echo {file_bytes.name} > errors.txt")
             except:
                 st.error(
                     "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
                 )
-                os.system(f"echo {file_bytes.name} > errors.txt")
 
 elif option == "Centros de Educación de Adultos":
     st.markdown(

@@ -7,6 +7,7 @@ import base64
 import re
 from texts import TEXTS, columns_to_add, text2num, cursos_inf, cursos_prim
 import mailing
+import primary_students as prim
 
 # import requests
 
@@ -175,6 +176,8 @@ option = st.sidebar.selectbox(
         "Alumnado",
         "Profesorado",
         "Centros de Educación de Adultos",
+        "Alumnado desde GIR",
+        "Profesorado desde GIR",
     ],
 )
 
@@ -240,6 +243,70 @@ elif option == "Centros de Educación de Adultos":
 viewer?embedded=true&url=https://github.com/catedu/csv-aeducar/raw/master/src/assets/tuto-subida-masiva-usuarios-EPA.pdf" width="100%" height="980px">""",
         unsafe_allow_html=True,
     )
+
+elif option == "Alumnado desde GIR":
+    st.sidebar.write(TEXTS["alumnos_primaria"])
+    try:
+        df_test = pd.read_csv("test_ceip.csv")
+    except:
+        df_test = pd.read_csv(
+            "https://raw.githubusercontent.com/catedu/csv-aeducar/master/src/test_ceip.csv"
+        )
+    df_test["username"][0] = "jlop1234"
+    df_test["username"][1] = "llop5678"
+    df_test["firstname"][0] = "Javier"
+    df_test["firstname"][1] = "Lucía"
+    file_bytes = st.file_uploader(
+        "Sube un archivo .xls",
+        type=("xls", "csv"),
+        encoding="ISO-8859-1",
+    )
+    cohort = st.checkbox("Organizar por cohortes")
+
+    if not file_bytes:
+        st.write(
+            "Para sacar los datos necesarios, en GIR Académico, sigue los pasos de la imagen:"
+        )
+        st.image(
+            "https://github.com/catedu/csv-aeducar/raw/master/src/assets/exportar_alumnos_gir.png",
+        )
+        st.write(
+            "### Demo de tabla resultante al subir el .xls obtenido del GIR a esta aplicación"
+        )
+        if cohort:
+            df_test = df_test.drop(columns=list(df_test.columns[5:]))
+            df_test["cohort1"] = ""
+            df_test["cohort1"][0] = "2pa"
+            df_test["cohort1"][1] = "3id"
+            st.dataframe(df_test)
+        else:
+            st.dataframe(df_test)
+
+    else:
+        try:
+            bytes_data = file_bytes.read()
+            s = str(bytes_data)
+            s = s.replace("\t", ",")
+            data = io.StringIO(s)
+            print(data)
+            df_csv = pd.read_csv(data)
+            if cohort:
+                df = prim.generate_df_alumnos_primaria(df_csv, cohort)
+            else:
+                df = prim.generate_df_alumnos_primaria(df_csv, cohort)
+            st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+            st.dataframe(df)
+            os.system(f"echo {file_bytes.name} > success.txt")
+        except:
+            try:
+                send_error_file(file_bytes)
+                os.system(f"echo {file_bytes.name} > errors.txt")
+            except:
+                st.error(
+                    "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
+                )
+                os.system(f"echo {file_bytes.name} > errors.txt")
+
 
 else:
     st.sidebar.write(TEXTS["en_progreso"])

@@ -5,11 +5,13 @@ import os
 import io
 import base64
 import re
-from texts import TEXTS, columns_to_add, text2num, cursos_inf, cursos_prim
+from texts import TEXTS, columns_to_add
 import mailing
 import primary_students as prim
+from maestros import write_maestros_page
 
 import requests
+
 
 def get_table_download_link(df):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
@@ -240,11 +242,7 @@ elif option == "Alumnado desde GIR":
     df_test["username"][1] = "llop5678"
     df_test["firstname"][0] = "Javier"
     df_test["firstname"][1] = "Lucía"
-    file_bytes = st.file_uploader(
-        "Sube un archivo .xls",
-        type=("xls", "csv"),
-        encoding="ISO-8859-1",
-    )
+    file_bytes = st.file_uploader("Sube un archivo", type=("xls", "csv"))
     cohort = st.checkbox("Organizar por cohortes")
 
     if not file_bytes:
@@ -268,12 +266,13 @@ elif option == "Alumnado desde GIR":
 
     else:
         try:
-            bytes_data = file_bytes.read()
+            bytes_data = file_bytes.read().decode("iso-8859-1")
+            # st.write(bytes_data)
             s = str(bytes_data)
-            s = s.replace("\t", ",")
+            # st.write(s)
+            # s = s.replace("\t", ",")
             data = io.StringIO(s)
-            print(data)
-            df_csv = pd.read_csv(data)
+            df_csv = pd.read_csv(data, sep="\t")
             if cohort:
                 df = prim.generate_df_alumnos_primaria(df_csv, cohort)
             else:
@@ -291,6 +290,8 @@ elif option == "Alumnado desde GIR":
                 )
                 os.system(f"echo {file_bytes.name} > errors.txt")
 
+elif option == "Profesorado desde GIR":
+    write_maestros_page()
 
 else:
     st.sidebar.write(TEXTS["en_progreso"])

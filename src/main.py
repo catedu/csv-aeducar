@@ -183,7 +183,7 @@ elif option == "Alumnado":
 
     if file_bytes:
         try:
-            df_excel = pd.read_excel(file_bytes)
+            df_excel = pd.read_excel(file_bytes, sheet_name="datos")
             if cohort:
                 df = generate_df_alumnos_secundaria(df_excel, cohort)
             else:

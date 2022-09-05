@@ -1,4 +1,4 @@
 [server]
 # port = 8501
-enableCORS = "true"
-maxUploadSize = 100
+enableCORS="true"
+maxUploadSize=20

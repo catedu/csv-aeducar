@@ -3,7 +3,7 @@ services:
   streamlit:
     build: .
     working_dir: /usr/src/app/src
-    command: "streamlit run src/main.py --logger.level=error"
+    command: "streamlit run main.py --logger.level=error"
     volumes:
       - "./src:/usr/src/app/src"
     networks:

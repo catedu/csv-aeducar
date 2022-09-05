@@ -2,7 +2,8 @@ version: "3"
 services:
   streamlit:
     build: .
-    command: "streamlit run src/main.py --logger.level=error"
+    working_dir: /usr/src/app/src
+    command: "streamlit run main.py --logger.level=error"
     volumes:
       - "./src:/usr/src/app/src"
     ports:

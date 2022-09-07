@@ -112,10 +112,8 @@ elif option == "Alumnado":
 
     if file_bytes:
         try:
-            try:
-                df_excel = pd.read_excel(file_bytes, sheet_name="Listado")
-            except:
-                df_excel = pd.read_excel(file_bytes, sheet_name="datos")
+            df_excel = pd.read_excel(file_bytes, sheet_name=None)
+            df_excel = df_excel[list(df_excel.keys())[0]]
 
             if cohort:
                 try:
@@ -205,29 +203,40 @@ elif option == "Alumnado desde GIR":
 
     else:
         try:
-            bytes_data = file_bytes.read().decode("iso-8859-1")
-            # st.write(bytes_data)
-            s = str(bytes_data)
-            # st.write(s)
-            # s = s.replace("\t", ",")
-            data = io.StringIO(s)
-            df_csv = pd.read_csv(data, sep="\t")
+            df_excel = pd.read_excel(file_bytes, sheet_name=None)
+            df_excel = df_excel[list(df_excel.keys())[0]]
             if cohort:
-                df = prim.generate_df_alumnos_primaria(df_csv, cohort)
+                df = prim.generate_df_alumnos_primaria(df_excel, cohort)
             else:
-                df = prim.generate_df_alumnos_primaria(df_csv, cohort)
+                df = prim.generate_df_alumnos_primaria(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
             os.system(f"echo {file_bytes.name} > success.txt")
         except:
             try:
-                send_error_file(file_bytes)
-                os.system(f"echo {file_bytes.name} > errors.txt")
+                bytes_data = file_bytes.read().decode("iso-8859-1")
+                # st.write(bytes_data)
+                s = str(bytes_data)
+                # st.write(s)
+                # s = s.replace("\t", ",")
+                data = io.StringIO(s)
+                df_csv = pd.read_csv(data, sep="\t")
+                if cohort:
+                    df = prim.generate_df_alumnos_primaria(df_csv, cohort)
+                else:
+                    df = prim.generate_df_alumnos_primaria(df_csv, cohort)
+                st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+                st.dataframe(df)
+                os.system(f"echo {file_bytes.name} > success.txt")
             except:
-                st.error(
-                    "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
-                )
-                os.system(f"echo {file_bytes.name} > errors.txt")
+                try:
+                    send_error_file(file_bytes)
+                    os.system(f"echo {file_bytes.name} > errors.txt")
+                except:
+                    st.error(
+                        "Ha habido un problema enviando el correo de error. Por favor, envía tu archivo a asesor@catedu.es"
+                    )
+                    os.system(f"echo {file_bytes.name} > errors.txt")
 
 elif option == "Profesorado desde GIR":
     write_maestros_page()

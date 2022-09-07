@@ -79,6 +79,10 @@ img {width: 100%;}
 </style>
 """
 
+st.set_page_config(
+    page_title="csv para Aeducar",
+    page_icon="favico.ico",
+)
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # t = "<div><span class='highlight red'>Aplicación en fase de test</span></div>"

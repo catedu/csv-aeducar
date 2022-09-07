@@ -4,13 +4,15 @@ import numpy as np
 import os
 import io
 import base64
-import re
+
 from texts import TEXTS, columns_to_add
 import mailing
 import primary_students as prim
 from maestros import write_maestros_page
-
-import requests
+from highschool_students import (
+    generate_df_alumnos_secundaria,
+    generate_df_alumnos_secundaria_nuevo_sigad,
+)
 
 
 def get_table_download_link(df):
@@ -24,79 +26,6 @@ def get_table_download_link(df):
     ).decode()  # some strings <-> bytes conversions necessary here
     href = f'<a href="data:file/csv;base64,{b64}" download="subida_usuarios.csv">Descarga aquí tu archivo csv</a>'
     return href
-
-
-def filterColumnsAlumnosSec(column):
-    to_preserve = [
-        "N_GIR",
-        "APELLIDO1",
-        "APELLIDO2",
-        "NOMBRE",
-        "EMAIL",
-        "EMAIL_PADRE",
-        "EMAIL_MADRE",
-    ]
-
-    if column in to_preserve:
-        return False
-    else:
-        return True
-
-
-def generate_df_alumnos_secundaria(df, cohort):
-    columns = filter(filterColumnsAlumnosSec, df.columns)
-
-    df["N_GIR"] = df["N_GIR"].astype(str)
-    try:
-        df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_PADRE"])
-        df["email"] = np.where(df["EMAIL"].notnull(), df["EMAIL"], df["EMAIL_MADRE"])
-    except:
-        pass
-    df["email"] = np.where(
-        df["EMAIL"].notnull(),
-        df["EMAIL"],
-        "alumnado@education.catedu.es",
-    )
-    df["password"] = "changeme"
-
-    gir_username = (
-        df["NOMBRE"].str.lower().str[0]
-        + df["APELLIDO1"].str.replace(" ", "").str.lower().str[:3]
-        + df["N_GIR"].str[-4:]
-    )
-
-    df["username"] = gir_username
-
-    df["username"] = np.where(
-        df["username"].notnull(),
-        df["username"],
-        df["NOMBRE"].str.lower() + df["N_GIR"].str[-4:],
-    )
-
-    df["username"] = (
-        df["username"]
-        .str.normalize("NFKD")
-        .str.encode("ascii", errors="ignore")
-        .str.decode("utf-8")
-    )
-
-    df["firstname"] = df["NOMBRE"].str.title()
-    df["lastname"] = (
-        df["APELLIDO1"].fillna("").str.title()
-        + " "
-        + df["APELLIDO2"].fillna("").str.title()
-    )
-
-    if cohort:
-        df["cohort1"] = df["GRUPO"]
-    else:
-        df1 = pd.DataFrame(columns=columns_to_add)
-        df = pd.concat([df, df1])
-
-    df = df.drop(columns=columns)
-    df = df.drop(columns=[column for column in df.columns if column.isupper()])
-
-    return df
 
 
 def generate_df_profesores_secundaria(df, cohort):
@@ -183,11 +112,21 @@ elif option == "Alumnado":
 
     if file_bytes:
         try:
-            df_excel = pd.read_excel(file_bytes, sheet_name="datos")
+            try:
+                df_excel = pd.read_excel(file_bytes, sheet_name="Listado")
+            except:
+                df_excel = pd.read_excel(file_bytes, sheet_name="datos")
+
             if cohort:
-                df = generate_df_alumnos_secundaria(df_excel, cohort)
+                try:
+                    df = generate_df_alumnos_secundaria(df_excel, cohort)
+                except:
+                    df = generate_df_alumnos_secundaria_nuevo_sigad(df_excel, cohort)
             else:
-                df = generate_df_alumnos_secundaria(df_excel, cohort)
+                try:
+                    df = generate_df_alumnos_secundaria(df_excel, cohort)
+                except:
+                    df = generate_df_alumnos_secundaria_nuevo_sigad(df_excel, cohort)
             st.markdown(get_table_download_link(df), unsafe_allow_html=True)
             st.dataframe(df)
         except:

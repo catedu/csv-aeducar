@@ -116,8 +116,11 @@ elif option == "Alumnado":
 
     if file_bytes:
         try:
-            df_excel = pd.read_excel(file_bytes, sheet_name=None)
-            df_excel = df_excel[list(df_excel.keys())[0]]
+            try:
+                df_excel = pd.read_excel(file_bytes, sheet_name="datos")
+            except:
+                df_excel = pd.read_excel(file_bytes, sheet_name=None)
+                df_excel = df_excel[list(df_excel.keys())[0]]
 
             if cohort:
                 try:

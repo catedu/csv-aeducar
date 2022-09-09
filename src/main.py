@@ -207,8 +207,11 @@ elif option == "Alumnado desde GIR":
 
     else:
         try:
-            df_excel = pd.read_excel(file_bytes, sheet_name=None)
-            df_excel = df_excel[list(df_excel.keys())[0]]
+            try:
+                df_excel = pd.read_excel(file_bytes, sheet_name=None)
+                df_excel = df_excel[list(df_excel.keys())[0]]
+            except:
+                df_excel = pd.read_excel(file_bytes, sheet_name="datos")
             if cohort:
                 df = prim.generate_df_alumnos_primaria(df_excel, cohort)
             else:

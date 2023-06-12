@@ -8,7 +8,7 @@ Una vez devuelto el .csv, no se conserva ningún dato en el servidor.
 
 *Más instrucciones desplegando el menú de la izquierda*
 """,
-    "alumnos_secundaria": """## Descarga tu .xls del SIGAD
+    "alumnado": """## Descarga tu .xls del SIGAD
 
 En Utilidades -> Informes -> ALUM -> descarga Listado completo de alumnos con todos sus datos.
 
@@ -24,7 +24,7 @@ Campos opcionales:
 * EMAIL_MADRE
 
 """,
-    "profesores_secundaria": """## Descarga tu .xls del SIGAD
+    "profesorado": """## Descarga tu .xls del SIGAD
 
 ### Sería necesario añadir el campo mail. Si alguien sabe cómo sacar estos datos del SIGAD incluyendo el mail del profesorado, que envíe un correro a asesor@catedu.es para que actualice el funcionamiento de esta aplicación, indicándome cómo ha obtenido estos datos y un .xls de prueba aunque sea con sólo un registro y datos falsos. De momento todos los registros tendrán el mismo mail. El profesorado podrá acceder a su perfil y modificarlo ya en su moodle.
 
@@ -43,7 +43,7 @@ Puedes probar el funcionamiento descargando [este archivo para tests](https://gi
 Este servicio estará disponible durante la semana del 14 al 18 de Septiembre
 
     """,
-    "alumnos_primaria": """## Descarga tu .xls del GIR
+    "alumnado_GIR": """## Descarga tu .xls del GIR
 
 Campos mínimos requeridos en el archivo .xls:
 * Nº Alumno GIR
@@ -53,7 +53,7 @@ Campos mínimos requeridos en el archivo .xls:
 
 ### Si en tu centro habéis cambiado los nombres cortos de los cursos, los alumnos se crearán en la plataforma, pero no se matricularán en los cursos.
 """,
-    "maestros": """## Descarga tu .xls del GIR
+    "maestros_GIR": """## Descarga tu .xls del GIR
 
 Campos mínimos requeridos en el archivo .xls:
 * Nº Documento

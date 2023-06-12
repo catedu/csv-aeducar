@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from texts import TEXTS, columns_to_add
 
+
 def filterColumnsAlumnosSec(column):
     to_preserve = [
         "N_GIR",
@@ -19,7 +20,7 @@ def filterColumnsAlumnosSec(column):
         return True
 
 
-def generate_df_alumnos_secundaria(df, cohort):
+def generate_df(df, cohort):
     columns = filter(filterColumnsAlumnosSec, df.columns)
 
     df["N_GIR"] = df["N_GIR"].astype(str)
@@ -74,13 +75,14 @@ def generate_df_alumnos_secundaria(df, cohort):
 
     return df
 
-def generate_df_alumnos_secundaria_nuevo_sigad(df, cohort):
-    columns_to_delete =  df.columns.to_list()
+
+def generate_df_nuevo_sigad(df, cohort):
+    columns_to_delete = df.columns.to_list()
 
     df["ID Alumno Centro"] = df["ID Alumno Centro"].astype(str)
-        
+
     df["email"] = "alumnado@education.catedu.es"
-    
+
     df["password"] = "changeme"
 
     base_username = (
@@ -115,7 +117,7 @@ def generate_df_alumnos_secundaria_nuevo_sigad(df, cohort):
     else:
         df1 = pd.DataFrame(columns=columns_to_add)
         df = pd.concat([df, df1])
-        
+
     # print(df.columns)
     # print(columns_to_delete)
 
